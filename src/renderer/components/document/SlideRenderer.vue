@@ -1,40 +1,46 @@
 <template>
-  <div class="slide-renderer">
-    <NodeRenderer :node="rootElement" />
-  </div>
+  <NodeDisplay
+    class="slide-root"
+    :node="rootElement"
+    :isRoot="true"
+  />
 </template>
 
 <script lang="ts">
-import { useEditor } from '@/renderer/store'
-import { storeToRefs } from 'pinia'
 import { computed } from '@vue/reactivity'
-import NodeRenderer from './nodes/NodeRenderer.vue'
+import NodeDisplay from './nodes/NodeDisplay.vue'
 import Rect from '@/renderer/models/nodes/Rect'
+import { defineComponent } from '@vue/runtime-core'
+import { Slide } from '@/renderer/models/document/slide'
+import { FluentDocument } from '@/renderer/models/document/FluentDocument'
 
-export default {
+export default defineComponent({
   name: 'SlideRenderer',
   components: {
-    NodeRenderer
+    NodeDisplay
   },
 
-  setup () {
-    const editorStore = useEditor()
-    const { document } = storeToRefs(editorStore)
+  props: {
+    document: Object,
+    activeSlide: Number
+  },
 
-    const activeSlide = computed(() => document.value.slides[editorStore.slideIndex])
+  setup (props) {
+    const activeSlide_ = computed((): Slide | null =>
+      (props.document as FluentDocument)?.slides[props.activeSlide ?? 0])
 
     const rootElement = computed(() => ({
-      ...activeSlide.value.root,
-      rect: new Rect(0, 0, document.value.meta.size.width, document.value.meta.size.height),
-      fill: activeSlide.value.background
+      ...activeSlide_.value?.root,
+      rect: new Rect(0, 0,
+        props.document?.meta.size.width,
+        props.document?.meta.size.height),
+      fill: activeSlide_.value?.background
     }))
 
     return {
-      editorStore,
-      document,
-      activeSlide,
+      activeSlide_,
       rootElement
     }
   }
-}
+})
 </script>

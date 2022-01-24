@@ -6,16 +6,18 @@
 
     :x="node.rect?.x"
     :y="node.rect?.y"
-    :width="node.rect?.width"
-    :height="node.rect?.height"
+    :width="(node.rect?.width ?? 1280) * scale"
+    :height="(node.rect?.height ?? 720) * scale"
 
-    :viewbox="`0 0 ${node.rect?.width} ${node.rect?.height}`"
+    :viewBox="`0 0 ${node.rect?.width} ${node.rect?.height}`"
   >
     <!-- Frame Background Rect -->
     <SvgElement
-      :id="node.id"
+      :_id="node.id"
       :tag="'rect'"
-      :fill="node.fill ?? 'transparent'"
+      :defs="{
+        fill: node.fill ?? 'transparent'
+      }"
       x="0"
       y="0"
       :width="node.rect?.width"
@@ -23,7 +25,7 @@
     />
 
     <!-- Frame Child Nodes -->
-    <NodeRenderer
+    <NodeDisplay
       v-for="child in node.children"
       :key="child.id"
       :node="child"
@@ -32,17 +34,15 @@
 </template>
 
 <script>
-import NodeRenderer from './NodeRenderer.vue'
-import SvgElement from './SvgElement.vue'
+import SvgElement from './svgElement/SvgElement.vue'
 
 export default {
-  name: 'NodeRenderer',
   components: {
-    NodeRenderer,
     SvgElement
   },
   props: {
-    node: Object
+    node: Object,
+    scale: { type: Number, default: () => 1 }
   }
 }
 </script>

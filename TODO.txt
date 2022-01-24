@@ -1,0 +1,45 @@
+
+==================================
+============   TODO   ============
+==================================
+
+=== Window ===
+
+- Titlebar
+  - Window Control [DONE]
+  - Tabs [DONE]
+  - Action Search
+
+- App Menu [DONE]
+  - Submenus
+
+- Tooltips
+
+=== Editor ===
+
+- Actions System
+  - Callable Actions [DONE]
+  - Keyboard Shortcut system [DONE]
+    - Configurable???? - Nah!
+
+- Color Picker
+  - Eyedropper
+
+- Path Tool
+  - Bezier Split
+
+- Text Editor
+
+=== Document ===
+
+- Frames [DONE]
+- Text
+- Line / Arrow
+- Svg Element [DONE]
+  - Path [DONE]
+  - Rect [DONE]
+  - Star [DONE]
+  - Polygon [DONE]
+  - Elipse [DONE]
+
+=== HTML COMPILER ===

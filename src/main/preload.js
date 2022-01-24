@@ -16,6 +16,7 @@ contextBridge.exposeInMainWorld('electron', {
     },
     isMaximized (cb) {
       ipcRenderer.addListener('window:isMaximized', (e, val) => cb(val))
+      cb(ipcRenderer.sendSync('window:isMaximized'))
     }
   }
 })

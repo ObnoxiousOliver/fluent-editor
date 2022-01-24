@@ -1,6 +1,6 @@
 'use strict'
 
-import { app, protocol, BrowserWindow, shell, ipcMain } from 'electron'
+import { app, protocol, BrowserWindow, shell, ipcMain, Menu } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS3_DEVTOOLS } from 'electron-devtools-installer'
 
@@ -16,9 +16,11 @@ protocol.registerSchemesAsPrivileged([
 async function createWindow () {
   // Create the browser window.
   const win = new BrowserWindow({
-    frame: true,
-    width: 800,
-    height: 600,
+    frame: false,
+    minWidth: 1000,
+    minHeight: 700,
+    width: 1000,
+    height: 700,
     webPreferences: {
       webSecurity: false,
 
@@ -31,6 +33,11 @@ async function createWindow () {
     }
   })
 
+  Menu.setApplicationMenu(Menu.buildFromTemplate([
+    { role: 'reload' },
+    { role: 'toggleDevTools' }
+  ]))
+
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
     await win.loadURL(process.env.WEBPACK_DEV_SERVER_URL)
@@ -42,9 +49,13 @@ async function createWindow () {
   }
 
   // Open urls in the user's browse
-  win.webContents.addListener('new-window', (event, url) => {
+  win.webContents.on('new-window', (event, url) => {
     event.preventDefault()
     shell.openExternal(url)
+  })
+
+  win.webContents.on('did-finish-load', () => {
+    win.webContents.setZoomFactor(1)
   })
 
   win.on('close', () => win.destroy())
@@ -60,6 +71,7 @@ ipcMain.on('window:close', e => BrowserWindow.getAllWindows().find(x => x.id ===
 ipcMain.on('window:maximize', e => BrowserWindow.getAllWindows().find(x => x.id === e.frameId).maximize())
 ipcMain.on('window:unmaximize', e => BrowserWindow.getAllWindows().find(x => x.id === e.frameId).unmaximize())
 ipcMain.on('window:minimize', e => BrowserWindow.getAllWindows().find(x => x.id === e.frameId).minimize())
+ipcMain.on('window:isMaximized', e => { e.returnValue = BrowserWindow.getAllWindows().find(x => x.id === e.frameId).isMaximized() })
 
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {
