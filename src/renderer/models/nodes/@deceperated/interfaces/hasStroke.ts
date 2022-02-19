@@ -1,4 +1,4 @@
-import Stroke from '../../vector/Stroke'
+import Stroke from '../../../vector/Stroke'
 
 export default interface hasStroke {
   stroke: Stroke | null,

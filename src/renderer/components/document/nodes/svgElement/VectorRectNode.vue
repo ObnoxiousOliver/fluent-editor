@@ -22,6 +22,16 @@ export default defineComponent({
     vectorData: Object,
     node: Object,
     defs: Object
+  },
+
+  methods: {
+    getShapeSvg () {
+      return {
+        tag: 'rect',
+        width: this.node?.rect?.width,
+        height: this.node?.rect?.height
+      }
+    }
   }
 })
 </script>

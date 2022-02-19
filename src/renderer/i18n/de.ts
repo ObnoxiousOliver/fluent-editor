@@ -38,5 +38,13 @@ export default {
   document: {
     untitled: 'Unbennant {0}',
     slide: 'Folie {0}'
+  },
+  smallWindowWarning: {
+    title: 'Zu klein!',
+    detail: 'Anscheinend ist Ihr Browserfenster zu klein für diese Anwendung. Die Mindestgröße beträgt {0} x {1} Pixel.'
+  },
+  input: {
+    auto: 'auto',
+    mixed: 'gemischt'
   }
 }

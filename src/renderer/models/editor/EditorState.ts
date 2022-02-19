@@ -8,6 +8,7 @@ export default interface EditorState {
   activeSlide: number,
   document: FluentDocument,
   selection: Selection,
+  openPropertyPanels: { [x: string]: boolean }
 }
 
 export function createEditorState (options: {
@@ -19,6 +20,9 @@ export function createEditorState (options: {
     activeTool: 'selection',
     activeSlide: options.activeSlide ?? 0,
     document: options.document ?? createDocument(),
-    selection: createSelection()
+    selection: createSelection(),
+    openPropertyPanels: {
+      layout: true
+    }
   }
 }

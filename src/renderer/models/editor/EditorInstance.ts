@@ -5,5 +5,8 @@ export default interface EditorInstance {
   documentName?: string | number | null,
   filePath?: string | null,
   state: EditorState,
-  history?: EditorState[]
+  history: {
+    name: string,
+    state: EditorState
+  }[]
 }

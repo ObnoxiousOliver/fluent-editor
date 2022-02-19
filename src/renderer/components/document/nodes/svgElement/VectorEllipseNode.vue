@@ -22,6 +22,17 @@ export default defineComponent({
     vectorData: Object,
     node: Object,
     defs: Object
+  },
+  methods: {
+    getShapeSvg () {
+      return {
+        tag: 'ellipse',
+        cx: this.node?.rect?.width / 2,
+        cy: this.node?.rect?.height / 2,
+        rx: this.node?.rect?.width / 2,
+        ry: this.node?.rect?.height / 2
+      }
+    }
   }
 })
 </script>

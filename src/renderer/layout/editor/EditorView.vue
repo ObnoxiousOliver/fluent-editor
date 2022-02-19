@@ -7,10 +7,10 @@
       <ViewerPanel :editor="editor" />
     </div>
     <div :class="$bem('editor__panel', 'properties')">
-      Properties
+      <PropertiesPanel :editor="editor" />
     </div>
     <div
-      v-if="editor.state?.mode === 'animate'"
+      v-if="editor?.state?.mode === 'animate'"
       :class="$bem('editor__panel', 'timeline')"
     >
       Timeline
@@ -23,12 +23,14 @@ import { computed, defineComponent } from 'vue'
 import { useEditor } from '../../store'
 
 import HierachiePanel from './HierachiePanel.vue'
+import PropertiesPanel from './PropertiesPanel.vue'
 import ViewerPanel from './ViewerPanel.vue'
 
 export default defineComponent({
   components: {
     HierachiePanel,
-    ViewerPanel
+    ViewerPanel,
+    PropertiesPanel
   },
 
   props: {
@@ -55,17 +57,12 @@ export default defineComponent({
   height: 100%;
   display: grid;
 
-  gap: 2px;
+  gap: 1px;
   grid-template-columns: auto 1fr auto;
   grid-template-rows: 1fr;
   grid-auto-rows: auto;
 
-  @include r.light {
-    background: r.$col-100;
-  }
-  @include r.dark {
-    background: r.$col-800;
-  }
+  overflow: hidden;
 
   &__panel {
     position: relative;
@@ -83,11 +80,11 @@ export default defineComponent({
     }
 
     &--hierachie {
-      width: 300px;
+      width: 350px;
       grid-column: 1 / 2;
     }
     &--properties {
-      width: 300px;
+      width: 350px;
       grid-column: 3 / 4;
     }
 

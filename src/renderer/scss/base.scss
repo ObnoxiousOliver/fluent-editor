@@ -1,0 +1,43 @@
+@use './index' as r;
+
+:root {
+  font-family: r.$type;
+  font-size: 16px;
+  user-select: none;
+  overflow: hidden;
+}
+
+body {
+  @include r.light {
+    background: r.$col-white;
+    color: r.$col-800;
+  }
+  @include r.dark {
+    background: r.$col-700;
+    color: r.$col-white;
+  }
+}
+
+*, ::before, ::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:focus-visible {
+  outline: r.$col-primary solid 1px;
+  outline-offset: -1px;
+}
+
+::selection {
+  @include r.textSelection;
+}
+
+.fade {
+  &-enter-active, &-leave-active {
+    transition: opacity .15s;
+  }
+  &-enter-from, &-leave-to {
+    opacity: 0;
+  }
+}

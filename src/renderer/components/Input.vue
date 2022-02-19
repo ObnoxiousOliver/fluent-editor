@@ -8,8 +8,12 @@
     </div>
     <input
       class="input-field__input"
+      ref="input"
       :type="type"
+      v-model="value"
       :placeholder="placeholder"
+      @focus="onFocus"
+      @blur="$emit('input:blur')"
     >
     <div
       v-if="$slots.after"
@@ -21,12 +25,46 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@vue/runtime-core'
+import { defineComponent, ref, watch } from '@vue/runtime-core'
 
 export default defineComponent({
+  emits: ['update:modelValue', 'input:blur', 'input:focus'],
   props: {
     type: { type: String, default: () => 'text' },
-    placeholder: String
+    placeholder: String,
+    modelValue: String,
+    selectAllOnFocus: Boolean
+  },
+
+  setup (props, { emit }) {
+    const input = ref(null as HTMLInputElement | null)
+
+    const value = ref(props.modelValue)
+    watch(() => props.modelValue, val => { value.value = val })
+    watch(value, val => { emit('update:modelValue', val) })
+
+    function onFocus () {
+      emit('input:focus')
+
+      if (props.selectAllOnFocus) {
+        if (input.value) {
+          input.value.select()
+        }
+      }
+    }
+
+    function blur () {
+      if (input.value) {
+        input.value.blur()
+      }
+    }
+
+    return {
+      input,
+      onFocus,
+      value,
+      blur
+    }
   }
 })
 </script>
@@ -38,10 +76,10 @@ export default defineComponent({
   display: inline-flex;
   align-content: center;
 
-  line-height: 1.25rem;
+  line-height: 1.5;
 
   gap: 12px;
-  padding: 5px 12px;
+  padding: 3px 12px;
 
   border-radius: 5px;
 
@@ -61,16 +99,18 @@ export default defineComponent({
   }
 
   &__before, &__after {
-      @include r.light {
-        color: r.$col-400;
-      }
-      @include r.dark {
-        color: r.$col-200;
-      }
+    @include r.light {
+      color: r.$col-400;
+    }
+    @include r.dark {
+      color: r.$col-300;
+    }
   }
 
   &__input {
     @include r.buttonReset;
+
+    line-height: inherit;
 
     flex: 1 1 auto;
 
@@ -81,13 +121,17 @@ export default defineComponent({
         color: r.$col-400;
       }
       @include r.dark {
-        color: r.$col-200;
+        color: r.$col-300;
       }
     }
 
     &:focus {
       outline: none;
     }
+  }
+
+  &--number {
+    cursor: ew-resize;
   }
 }
 </style>

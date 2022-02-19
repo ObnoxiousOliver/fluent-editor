@@ -1,31 +1,43 @@
 import { useActions } from '@/renderer/store'
 import keycode from 'keycode'
 
+export let pressedKeys: any = {}
+export let ignoreKeys: number[] = []
+
+export function ignoreKey (key: number, ignore: boolean = true) {
+  if (ignore && !ignoreKeys.includes(key)) {
+    ignoreKeys.push(key)
+  }
+  if (!ignore) {
+    ignoreKeys = ignoreKeys.filter(x => x !== key)
+  }
+}
+
 export default {
   initialize () {
     const actionStore = useActions()
 
-    let pressedKeys: any = {}
     let keys: number[] = []
     let keybindExecuted: boolean = false
 
     function keydown (e: KeyboardEvent) {
-      if (e.composedPath().find((x: any) => x.tagName === 'INPUT')) return
-
-      // if (!['Control', 'Shift', 'Meta', 'Alt'].includes(e.key)) {
       pressedKeys[e.keyCode] = true
-      // }
 
-      setKeys(/* e.shiftKey, e.altKey, e.ctrlKey, e.metaKey */)
+      setKeys()
 
-      // console.log(actionStore.getKeyboardShortcuts
-      //   .filter(x => keys?.every((key: number) => x.shortcut.map(x => keycode(x)).includes(key))))
+      if (keys.length) {
+        console.log('%c[Pressed Keys]', 'color: #3ef;', keys.map(x => keycode(x)).join(', '))
+      }
 
-      console.log('%c[Pressed Keys]', 'color: #3ef;', keys.map(x => keycode(x)).join(', '))
+      if (e.composedPath().some((x: any) => x.tagName === 'INPUT' || x.isContentEditable) &&
+        !keys.map(x => keycode(x)).find(x => ['ctrl', 'alt', 'left command', 'right command'].includes(x))) {
+        return
+      }
 
       if (actionStore.getKeyboardShortcuts
         .filter(x => keys?.every((key: any) => x.shortcut.map(x => keycode(x)).includes(key))).length === 1 ||
         actionStore.inAppMenu) {
+        e.preventDefault()
         keybindExecuted = true
         executeKeybinds()
       }
@@ -33,6 +45,7 @@ export default {
 
     function keyup (e: KeyboardEvent) {
       if (!keybindExecuted) {
+        e.preventDefault()
         executeKeybinds()
       }
 
@@ -59,7 +72,7 @@ export default {
       //   ...Object.keys(pressedKeys).filter(x => pressedKeys[x])
       // ].filter(x => x)
 
-      keys = Object.keys(pressedKeys).filter(x => pressedKeys[x]).map(x => +x)
+      keys = Object.keys(pressedKeys).filter(x => pressedKeys[x] && !ignoreKeys.includes(+x)).map(x => +x)
     }
 
     function getSelectedActions () {

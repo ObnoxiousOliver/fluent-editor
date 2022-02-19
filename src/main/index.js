@@ -4,7 +4,9 @@ import { app, protocol, BrowserWindow, shell, ipcMain, Menu } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS3_DEVTOOLS } from 'electron-devtools-installer'
 
+import fs from 'fs'
 import path from 'path'
+import chokidar from 'chokidar'
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
@@ -17,8 +19,8 @@ async function createWindow () {
   // Create the browser window.
   const win = new BrowserWindow({
     frame: false,
-    minWidth: 1000,
-    minHeight: 700,
+    minWidth: 400,
+    minHeight: 200,
     width: 1000,
     height: 700,
     webPreferences: {
@@ -72,6 +74,48 @@ ipcMain.on('window:maximize', e => BrowserWindow.getAllWindows().find(x => x.id 
 ipcMain.on('window:unmaximize', e => BrowserWindow.getAllWindows().find(x => x.id === e.frameId).unmaximize())
 ipcMain.on('window:minimize', e => BrowserWindow.getAllWindows().find(x => x.id === e.frameId).minimize())
 ipcMain.on('window:isMaximized', e => { e.returnValue = BrowserWindow.getAllWindows().find(x => x.id === e.frameId).isMaximized() })
+
+const configPath = path.join(app.getPath('userData'), 'config.json')
+function getConfigJson (cb) {
+  fs.readFile(configPath, 'utf-8', (err, json) => {
+    if (err) {
+      cb(undefined)
+      return
+    }
+
+    try {
+      var data = JSON.parse(json)
+
+      cb(data)
+    } catch {
+      cb(undefined)
+    }
+  })
+}
+ipcMain.on('config:get', e => {
+  getConfigJson((data) => {
+    e.reply('config:get', data || {})
+  })
+})
+ipcMain.on('config:getSync', e => {
+  try {
+    e.returnValue = JSON.parse(fs.readFileSync(configPath, 'utf-8')) || {}
+  } catch {
+    e.returnValue = {}
+  }
+})
+ipcMain.on('config:listen', e => {
+  chokidar.watch(configPath).on('change', () => {
+    getConfigJson((data) => {
+      e.reply('config:listen', data || {})
+    })
+  })
+})
+ipcMain.on('config:update', (e, data) => {
+  fs.writeFile(configPath, JSON.stringify(data, null, 2), 'utf-8', (err) => {
+    err && console.log(err)
+  })
+})
 
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {

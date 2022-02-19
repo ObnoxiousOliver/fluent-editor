@@ -94,7 +94,7 @@ export default {
   }
 
   &.focus, &:not(.app-menu-btn__alt-focus):hover {
-    background: r.$col-500;
+    background: r.$col-600;
     color: r.$col-white;
   }
 }

@@ -14,7 +14,7 @@ export default defineComponent({
     editor: Object
   },
 
-  setup (props, { emit }) {
+  setup (props) {
     const editor_ = ref(props.editor)
 
     return {

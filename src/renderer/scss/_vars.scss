@@ -1,9 +1,20 @@
+
+// Poppins - Default App Font
 @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+// Roboto - Default Document Font
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700&display=swap');
+
+// Galada - Brand Font
 @import url('https://fonts.googleapis.com/css2?family=Galada&display=swap');
 
+// PT Serif - serif
+@import url('https://fonts.googleapis.com/css2?family=PT+Serif:ital,wght@0,400;0,700;1,400&display=swap');
+
 $col-primary: #0066FF;
-$col-warning: #E7C928;
-$col-danger: #FF2727;
+$col-selection: #25A4FF;
+$col-warning: #F8B60C;
+$col-danger: #FF3737;
 
 $col-white: #FFFFFF;
 $col-50: #F8F8F8;
@@ -15,7 +26,7 @@ $col-500: #404040;
 $col-600: #2D2D2D;
 $col-700: #252525;
 $col-800: #202020;
-$col-900: #1D1D1D;
+$col-900: #151515;
 $col-black: #000000;
 
 $bg-mod-white: #FFFFFF22;
@@ -27,3 +38,5 @@ $shadow-high: #00000044 0 10px 20px;
 
 $type: 'Poppins', sans-serif;
 $type-brand: 'Galada', cursive;
+$type-doc: 'Roboto', sans-serif;
+$type-serif: 'PT Serif', serif;

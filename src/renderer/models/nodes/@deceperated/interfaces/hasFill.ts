@@ -1,4 +1,4 @@
-import { Fill } from '../../vector/Fill'
+import { Fill } from '../../../vector/Fill'
 
 export default interface hasFill {
   fill: Fill,

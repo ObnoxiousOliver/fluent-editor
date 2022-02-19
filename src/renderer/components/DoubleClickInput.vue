@@ -15,8 +15,10 @@
         v-model="value"
         @blur="focused = false"
         @keydown.enter="focused = false"
+        @keydown.esc="focused = false; value = startValue"
 
         class="dbclick-input__input"
+        :placeholder="placeholder"
         type="text"
         spellcheck="false"
         autocomplete="false"
@@ -48,11 +50,15 @@ export default defineComponent({
 
     const focused = ref(false)
 
+    const startValue = ref(undefined as string | undefined)
+
     onMounted(() => {
       interact(root.value!)
         .on('doubletap', (e) => {
           if (!focused.value) {
             focused.value = true
+            startValue.value = value.value
+
             setTimeout(() => {
               input.value!.focus()
               input.value!.select()
@@ -65,7 +71,8 @@ export default defineComponent({
       root,
       input,
       value,
-      focused
+      focused,
+      startValue
     }
   }
 })
@@ -85,6 +92,14 @@ export default defineComponent({
     &:focus {
       outline: none;
     }
+    &::placeholder {
+      color: r.$col-300;
+      // @include r.light {
+      // }
+      // @include r.dark {
+      //   color: r.$col-300;
+      // }
+    }
   }
 }
 
@@ -94,16 +109,17 @@ export default defineComponent({
   align-items: center;
   position: relative;
 
-  @include r.light {
-    background: r.$col-white;
-    color: r.$col-black;
-  }
-  @include r.dark {
-    background: r.$col-600;
-    color: r.$col-white;
-  }
+  color: r.$col-black;
+  background: r.$col-white;
+  // @include r.light {
+  // }
+  // @include r.dark {
+  //   background: r.$col-600;
+  //   color: r.$col-white;
+  // }
 
   border: r.$col-primary solid 1px;
+
   padding: 2px;
   margin: -3px;
 

@@ -1,9 +1,11 @@
 import { defineStore } from 'pinia'
+import { setTransitionHooks } from 'vue'
 import { createDocument } from '../models/document/FluentDocument'
 import { createSlide } from '../models/document/Slide'
 import EditorInstance from '../models/editor/EditorInstance'
 import { createEditorState } from '../models/editor/EditorState'
-import Vector from '../models/nodes/Vector'
+import Rect from '../models/nodes/Rect'
+import createTextNode from '../models/nodes/TextNode'
 import randomId from '../utils/randomId'
 
 export const useEditor = defineStore('editor', {
@@ -17,27 +19,10 @@ export const useEditor = defineStore('editor', {
         .filter(x => typeof (x.documentName) === 'number')
         .map(x => x.documentName as number)
 
-      const slide = createSlide(undefined, undefined, {
-        type: 'linear',
-        x1: 0,
-        y1: 0,
-        x2: 0,
-        y2: 1,
-        stops: [
-          { color: '#303', offset: 0 },
-          { color: '#033', offset: 1 }
-        ]
-      })
+      const slide = createSlide()
 
-      slide.root.children.push(new Vector()
-        .setVector('rect')
-        .setFill('#39f')
-        .setRect({
-          height: 100,
-          width: 200,
-          x: 0,
-          y: 400
-        }))
+      slide.fill = '#2E3629'
+      slide.children.push(createTextNode(new Rect(100, 100)))
 
       const doc = createDocument({
         slides: [
@@ -50,7 +35,8 @@ export const useEditor = defineStore('editor', {
         documentName: (Math.max(...(numbers.length ? numbers : [0])) || 0) + 1,
         state: createEditorState({
           document: doc
-        })
+        }),
+        history: []
       })
       this.currentTab = this.tabs.length
     },
@@ -63,8 +49,11 @@ export const useEditor = defineStore('editor', {
     }
   },
   getters: {
-    currentEditor (state) {
-      return state.tabs[state.currentTab - 1]
+    /**
+     * @deprecated
+     */
+    currentEditor (): EditorInstance | null {
+      return this.tabs[this.currentTab - 1] as EditorInstance
     }
   }
 })

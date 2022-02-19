@@ -72,7 +72,7 @@ export default defineComponent({
 
 .tab-btns {
   display: flex;
-  padding: 0 5px 1px;
+  // padding: 0 5px;
   gap: 1px;
 
   &__tabs {
@@ -105,7 +105,7 @@ export default defineComponent({
     -webkit-app-region: no-drag;
 
     &:hover {
-      background: r.$col-500;
+      background: r.$col-600;
       color: r.$col-white;
     }
   }

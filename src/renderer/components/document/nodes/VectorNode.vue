@@ -1,5 +1,6 @@
 <template>
   <component
+    ref="root"
     :is="'vector_' + node?.vectorType"
     :vectorData="node?.vectorData"
     :node="node"
@@ -67,6 +68,14 @@ export default defineComponent({
   },
   props: {
     node: Object
+  },
+  methods: {
+    getShapeSvg () {
+      return (this.$refs.root as any)?.getShapeSvg?.()
+    },
+    getBoundingBox () {
+      return this.node?.rect
+    }
   }
 })
 </script>

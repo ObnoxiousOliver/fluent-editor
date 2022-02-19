@@ -43,6 +43,18 @@ export default {
   props: {
     node: Object,
     scale: { type: Number, default: () => 1 }
+  },
+  methods: {
+    getShapeSvg () {
+      return {
+        tag: 'rect',
+        width: this.node?.rect?.width,
+        height: this.node?.rect?.height
+      }
+    },
+    getBoundingBox () {
+      return this.node?.rect
+    }
   }
 }
 </script>

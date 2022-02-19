@@ -3,11 +3,11 @@ export default {
     // FILE
     file: { name: 'File', key: 'f' },
 
-    newFile: { name: 'New File', key: 'n' },
-    openFile: { name: 'Open File...', key: 'o' },
+    newFile: { name: 'New', key: 'n' },
+    openFile: { name: 'Open...', key: 'o' },
 
     save: { name: 'Save', key: 's' },
-    saveAs: { name: 'Save As...', key: 'a' },
+    saveAs: { name: 'Save as...', key: 'a' },
 
     export: { name: 'Export', key: 'x' },
 
@@ -28,7 +28,7 @@ export default {
     // HELP
     help: { name: 'Help', key: 'h' },
 
-    checkForUpdates: { name: 'Check For Updates...', key: 'u' },
+    checkForUpdates: { name: 'Check for updates...', key: 'u' },
 
     about: { name: 'About...', key: 'a' }
   },
@@ -38,5 +38,27 @@ export default {
   document: {
     untitled: 'Untitled {0}',
     slide: 'Slide {0}'
+  },
+  smallWindowWarning: {
+    title: 'Too small!',
+    detail: 'Seems like your browser window is too small to fit this application. The minimum size is {0} x {1} pixels.'
+  },
+  properties: {
+    layout: {
+      name: 'Layout',
+      x: 'X',
+      y: 'Y',
+      w: 'W',
+      h: 'H'
+    },
+    transform: {
+      name: 'Transform',
+      translate: 'Translate',
+      scale: 'Scale'
+    }
+  },
+  input: {
+    auto: 'auto',
+    mixed: 'Mixed'
   }
 }

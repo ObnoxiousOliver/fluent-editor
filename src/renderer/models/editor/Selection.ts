@@ -1,11 +1,11 @@
 export default interface Selection {
   selection: string[],
-  hovering: string[]
+  editing: string | null
 }
 
 export function createSelection () : Selection {
   return {
     selection: [],
-    hovering: []
+    editing: null
   }
 }

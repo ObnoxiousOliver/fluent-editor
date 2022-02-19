@@ -1,12 +1,12 @@
-import { Fill } from '../vector/Fill'
-import Stroke from '../vector/Stroke'
+import { Fill } from '../../vector/Fill'
+import Stroke from '../../vector/Stroke'
 import hasFill from './interfaces/hasFill'
 import hasRect from './interfaces/hasRect'
 import hasStroke from './interfaces/hasStroke'
 import hasVector from './interfaces/hasVector'
-import Node from './Node'
+import Node from '../Node'
 import NodeTypes from './NodeTypes'
-import Rect from './Rect'
+import Rect from '../Rect'
 import { VectorType } from './svg/VectorType'
 
 export default class Vector extends Node implements hasRect, hasFill, hasStroke, hasVector {
@@ -17,7 +17,7 @@ export default class Vector extends Node implements hasRect, hasFill, hasStroke,
   stroke: Stroke | null
 
   constructor (name?: string, id?: string) {
-    super(NodeTypes.Vector, name, id)
+    super(NodeTypes.Vector, {}, new Rect(), name, id)
     this.rect = new Rect()
     this.fill = null
     this.vectorType = 'rect'

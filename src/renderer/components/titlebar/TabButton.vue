@@ -81,6 +81,8 @@ export default defineComponent({
   min-width: 100px;
   font-size: 14px;
 
+  padding: 2px 0 0;
+
   flex: 1 1 0;
   width: 0;
 
@@ -92,23 +94,26 @@ export default defineComponent({
   -webkit-app-region: no-drag;
   color: r.$col-200;
 
-  &:hover, &--active {
-    background: r.$col-500;
+  &:where(:hover) {
+    background: r.$col-600;
     color: r.$col-white;
   }
 
   &--active {
-    // &:hover {
-    //   background: r.$col-500;
-    // }
+    background: r.$col-700;
+    color: r.$col-white;
   }
 
   &--home {
-    flex: 0 0 40px;
-    min-width: 40px;
+    $width: 40px;
+
+    flex: 0 0 $width;
+    width: $width;
+    min-width: unset;
 
     .tab-btn__name {
-      width: 40px;
+      text-align: center;
+      width: $width;
       padding: 0;
     }
   }
@@ -121,6 +126,7 @@ export default defineComponent({
     height: 100%;
     width: 100%;
 
+    text-align: left;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -134,15 +140,15 @@ export default defineComponent({
     position: absolute;
     inset: 0 0 0 auto;
 
-    width: 22px;
-    height: 22px;
+    width: 23px;
+    height: 23px;
     margin: auto 6px;
 
     display: flex;
     justify-content: center;
     align-items: center;
 
-    border-radius: 5px;
+    border-radius: 50%;
 
     color: r.$col-200;
     font-size: 1.2rem;
@@ -150,12 +156,12 @@ export default defineComponent({
     transition: background .1s, color .1s;
 
     [class^="bi"]::before {
-      vertical-align: -.175em;
+      vertical-align: -.15em;
     }
 
     &:hover {
+      background: r.$col-500;
       color: r.$col-white;
-      background: r.$col-400;
     }
 
     &--unsaved {

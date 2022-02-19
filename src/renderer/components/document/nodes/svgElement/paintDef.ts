@@ -1,5 +1,5 @@
-import DefComponent from '@/renderer/models/nodes/svg/DefComponent'
-import DefParser from '@/renderer/models/nodes/svg/DefParser'
+import DefComponent from '@/renderer/models/svg/DefComponent'
+import DefParser from '@/renderer/models/svg/DefParser'
 import Gradient, { Stop } from '@/renderer/models/vector/Gradient'
 
 export default {

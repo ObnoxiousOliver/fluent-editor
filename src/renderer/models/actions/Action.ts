@@ -4,5 +4,5 @@ export default interface Action {
   description?: string,
   executeInAppMenu?: boolean,
   keyboardShortcuts?: string[][],
-  callback: Function
+  hooks?: Function[]
 }

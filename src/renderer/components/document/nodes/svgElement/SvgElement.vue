@@ -15,8 +15,8 @@
 <script lang="ts">
 import fillDef from './paintDef'
 import { computed, defineComponent } from '@vue/runtime-core'
-import DefComponent from '@/renderer/models/nodes/svg/DefComponent'
-import DefParser from '@/renderer/models/nodes/svg/DefParser'
+import DefComponent from '@/renderer/models/svg/DefComponent'
+import DefParser from '@/renderer/models/svg/DefParser'
 import randomId from '@/renderer/utils/randomId'
 
 export default defineComponent({
@@ -33,7 +33,7 @@ export default defineComponent({
       fillDef
     ]
 
-    function getDefHtml (def: DefComponent) : string {
+    function getDefHtml (def: DefComponent): string {
       return def.tag ? `
         <${def.tag} ${(def.attributes && Object.keys(def.attributes)?.map(key => `${key}="${(def.attributes as any)[key]}"`).join(' ')) ?? ''}>
           ${def.children?.map(x => getDefHtml(x)).join('') ?? ''}

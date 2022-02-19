@@ -32,7 +32,7 @@
 <script lang="ts">
 import { computed, ref } from '@vue/reactivity'
 import AppMenuButton from './AppMenuButton.vue'
-import { onMounted, watch } from '@vue/runtime-core'
+import { watch } from '@vue/runtime-core'
 
 import AppMenuItem from '@/renderer/models/appMenu/AppMenuItem'
 import { useActions } from '../../store'
@@ -116,38 +116,23 @@ export default {
       actions.inAppMenu = !!focusedMenu.value
     })
 
-    actions.addAction({
-      id: 'focus-app-menu',
-      keyboardShortcuts: [
-        ['alt']
-      ],
-      executeInAppMenu: true,
-      callback () {
-        if (activeElement) {
-          if (!!activeElement.focus && activeElement.tagName !== 'BODY') {
-            activeElement.focus()
-          } else {
-            if (document.activeElement) {
-              (document.activeElement as any).blur()
-            }
-          }
-
-          activeElement = null
-          focusedMenu.value = null
+    actions.hook('focus-app-menu', () => {
+      if (activeElement) {
+        if (!!activeElement.focus && activeElement.tagName !== 'BODY') {
+          activeElement.focus()
         } else {
-          activeElement = document.activeElement
-
-          focusedMenu.value = [0]
+          if (document.activeElement) {
+            (document.activeElement as any).blur()
+          }
         }
-      }
-    })
 
-    onMounted(() => {
-      // document.addEventListener('click', (e: any) => {
-      //   if (!e.path.find((x: HTMLElement) => x.classList?.contains('app-menu'))) {
-      //     // focused.value = false
-      //   }
-      // })
+        activeElement = null
+        focusedMenu.value = null
+      } else {
+        activeElement = document.activeElement
+
+        focusedMenu.value = [0]
+      }
     })
 
     function blur (i: number) {
@@ -248,10 +233,12 @@ export default {
   position: relative;
   z-index: 9998;
 
-  // border-top: r.$col-600 solid 1px;
+  @include r.dark {
+    margin-bottom: 1px;
+  }
 
   display: flex;
-  background: r.$col-600;
+  background: r.$col-700;
 
   font-size: 0.8rem;
 

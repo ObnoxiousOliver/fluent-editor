@@ -52,7 +52,7 @@ export default {
   },
 
   setup (props) {
-    console.log(props)
+    // console.log(props)
 
     const scroller = ref(null)
     const content = ref(null)
@@ -137,6 +137,7 @@ export default {
     grid-row: 1 / 3;
     height: 100%;
     width: 100%;
+    scrollbar-width: none;
   }
 
   &--x &__scroller {

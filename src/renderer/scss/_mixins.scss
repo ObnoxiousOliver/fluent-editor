@@ -1,3 +1,5 @@
+@use './vars' as var;
+
 @mixin buttonReset {
   appearance: none;
   background: none;
@@ -16,4 +18,8 @@
   &, &.light {
     @content;
   }
+}
+
+@mixin textSelection {
+  background: rgba(var.$col-primary, .3);
 }

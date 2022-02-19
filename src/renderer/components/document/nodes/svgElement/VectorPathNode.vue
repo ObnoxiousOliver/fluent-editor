@@ -39,8 +39,34 @@ export default defineComponent({
       ].join(' ')).join(' ')
     })
 
+    const rawPathData = computed(() => {
+      var d = (props.vectorData as VectorPath)?.d
+      var rect = props.node?.rect
+
+      var maxY = Math.max(...d.map(x => x.p?.filter((_, i) => i % 2)).reduce((a, b) => [...(a ?? []), ...(b ?? [])]))
+      var maxX = Math.max(...d.map(x => x.p?.filter((_, i) => !(i % 2))).reduce((a, b) => [...(a ?? []), ...(b ?? [])]))
+
+      return d.map(x => [
+        x.t,
+        ...(x.p ?? [])
+          .map((p, i) => (i % 2
+            ? p * (rect?.height / maxY)
+            : p * (rect?.width / maxX)))
+      ].join(' ')).join(' ')
+    })
+
     return {
-      pathData
+      pathData,
+      rawPathData
+    }
+  },
+
+  methods: {
+    getShapeSvg () {
+      return {
+        tag: 'path',
+        d: this.rawPathData
+      }
     }
   }
 })

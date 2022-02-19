@@ -1,39 +1,37 @@
 <template>
   <AppLayout>
-    <AppTabsView :tabindex="editorStore.currentTab">
-      <HomeView />
-      <template
-        v-for="tab in editorStore.tabs"
-        :key="tab.id"
-      >
-        <Editor
-          :tabId="tab.id"
-        />
-      </template>
-    </AppTabsView>
+    <AppTabsView :tabindex="editorStore.currentTab" />
   </AppLayout>
+
+  <teleport to="head">
+    <component
+      v-if="actions.cursor"
+      :is="'style'"
+    >
+      * { cursor: {{ actions.cursor }} !important }
+    </component>
+  </teleport>
 </template>
 
 <script lang="ts">
 import { defineComponent, onBeforeUnmount, onMounted } from '@vue/runtime-core'
 
 import keybindManager from '../utils/keybindManager'
+import setupActions from '../utils/setupActions'
 
 import { useActions, useEditor } from '../store'
 import AppLayout from './AppLayout.vue'
 import AppTabsView from './AppTabsView.vue'
-import HomeView from './HomeView.vue'
-import Editor from './editor/EditorView.vue'
-
-declare var global: any
+// import HomeView from './HomeView.vue'
+// import Editor from './editor/EditorView.vue'
 
 export default defineComponent({
   name: 'App',
   components: {
     AppLayout,
-    AppTabsView,
-    HomeView,
-    Editor
+    AppTabsView
+    // HomeView,
+    // Editor
     // SlideRenderer
   },
 
@@ -50,13 +48,7 @@ export default defineComponent({
       localStorage.setItem('editorState', JSON.stringify(state))
     })
 
-    actions.addAction({
-      id: 'exit',
-      name: 'appMenu.exit.name',
-      callback: () => {
-        global.electron.window.close()
-      }
-    })
+    setupActions()
 
     // Handle Actions
     onMounted(() => {
@@ -65,57 +57,12 @@ export default defineComponent({
       onBeforeUnmount(() => dispose())
     })
 
-    onMounted(() => {
-      document.addEventListener('keydown', (e) => {
-        if (e.composedPath().find((x: any) => x.tagName === 'INPUT')) return
-
-        if (e.key === 'Enter') {
-          document.documentElement.classList.toggle('dark')
-        }
-      })
-    })
-
     return {
+      actions,
       editorStore
     }
   }
 })
 </script>
 
-<style lang="scss">
-@use '../scss' as r;
-
-:root {
-  font-family: r.$type;
-  font-size: 16px;
-  user-select: none;
-  overflow: hidden;
-}
-
-body {
-  @include r.light {
-    background: r.$col-white;
-    color: r.$col-900;
-  }
-  @include r.dark {
-    background: r.$col-700;
-    color: r.$col-white;
-  }
-}
-
-*, ::before, ::after {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-:focus-visible {
-  outline: r.$col-primary solid 1px;
-  outline-offset: -1px;
-}
-
-::selection {
-  background: rgba(r.$col-primary, .8);
-  color: r.$col-white;
-}
-</style>
+<style lang="scss" src="../scss/base.scss" />

@@ -2,10 +2,13 @@
   <div
     class="slide-canvas"
     ref="root"
-    @wheel.ctrl="wheelZoom"
-    @wheel.shift="wheel"
-    @wheel.exact="wheel"
+    @wheel.stop.prevent.ctrl="wheelZoom"
+    @wheel.stop.prevent.shift="wheel"
+    @wheel.stop.prevent.exact="wheel"
     @mousedown.middle="mousedown"
+
+    @mousemove="mousemove"
+    @contextmenu="contextmenu"
 
     @scroll="scroll"
   >
@@ -17,7 +20,7 @@
         class="slide-canvas__coord-system"
         ref="coord"
         :style="{
-          transform: `translate(${animatedPosX ?? Math.round(posX)}px, ${animatedPosY ?? Math.round(posY)}px)`,
+          transform: `translate(${animatedPosX ?? pixelPerfectPosX}px, ${animatedPosY ?? pixelPerfectPosY}px)`,
         }"
       >
         <SlideRenderer
@@ -25,14 +28,20 @@
           :activeSlide="editor_.state.active"
           :scale="scale"
           class="slide-canvas__renderer"
+          :editor="editor_"
         />
+        <!-- :posX="Math.round(posX)"
+        :posY="Math.round(posY)" -->
         <CanvasLayers
+          ref="canvasLayers"
           :editor="editor_"
           :scale="scale"
+          :posX="pixelPerfectPosX"
+          :posY="pixelPerfectPosY"
+          :viewportWidth="viewportWidth"
+          :viewportHeight="viewportHeight"
           class="slide-canvas__layers"
-        >
-          hello
-        </CanvasLayers>
+        />
       </div>
     </div>
     <ScrollBar
@@ -57,18 +66,20 @@
   </div>
 </template>
 <script lang="ts">
-import { computed, defineComponent, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, defineComponent, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref, watch } from 'vue'
 
 import interact from 'interactjs'
 import anime from 'animejs'
-import clamp from '@/renderer/utils/clamp'
+import { clamp } from '@/renderer/utils/math'
+import getElementPath from '@/renderer/utils/getElementPath'
 
-import { useActions } from '@/renderer/store'
+import { useActions, useRuntime } from '@/renderer/store'
 import EditorInstance from '@/renderer/models/editor/EditorInstance'
 
 import SlideRenderer from '@/renderer/components/document/SlideRenderer.vue'
 import ScrollBar from '../scrollViewer/ScrollBar.vue'
 import CanvasLayers from './CanvasLayers.vue'
+// import NodeTypes from '@/renderer/models/nodes/NodeTypes'
 
 export default defineComponent({
   components: { SlideRenderer, ScrollBar, CanvasLayers },
@@ -82,51 +93,51 @@ export default defineComponent({
 
   setup (props, { emit }) {
     const root = ref(null as HTMLElement | null)
+    const canvasLayers = ref()
     const canvas = ref(null as HTMLElement | null)
     const coord = ref(null as HTMLElement | null)
 
     const editor_ = ref(props.editor as EditorInstance | null)
     const actions = useActions()
+    const runtime = useRuntime()
 
     // #region CANVAS NAVIGATION
     const SCALE_FACTOR = 1.2
     const SCALE_MIN = 0.01
-    const SCALE_MAX = 10
+    const SCALE_MAX = 100
     const PADDING = 50
 
     const fitToScreen = ref(true)
 
-    actions.addAction({
-      id: 'canvas-zoom-1',
-      keyboardShortcuts: [['ctrl', '0']],
-      callback () {
-        scale.value = 1
-        fitToScreen.value = false
-      }
+    onActivated(() => {
+      actions.hook('canvas-zoom-1', canvasZoom1)
+      actions.hook('canvas-zoom-fit-to-screen', canvasZoomFitToScreen)
+      actions.hook('canvas-zoom-in', canvasZoomIn)
+      actions.hook('canvas-zoom-out', canvasZoomOut)
     })
-    actions.addAction({
-      id: 'canvas-zoom-fit-to-screen',
-      keyboardShortcuts: [['ctrl', '1']],
-      callback () {
-        fitToScreen.value = true
-      }
+
+    onDeactivated(() => {
+      actions.unhook('canvas-zoom-1', canvasZoom1)
+      actions.unhook('canvas-zoom-fit-to-screen', canvasZoomFitToScreen)
+      actions.unhook('canvas-zoom-in', canvasZoomIn)
+      actions.unhook('canvas-zoom-out', canvasZoomOut)
     })
-    actions.addAction({
-      id: 'canvas-zoom-in',
-      keyboardShortcuts: [['ctrl', '=']],
-      callback () {
-        scale.value *= SCALE_FACTOR
-        fitToScreen.value = false
-      }
-    })
-    actions.addAction({
-      id: 'canvas-zoom-out',
-      keyboardShortcuts: [['ctrl', '-']],
-      callback () {
-        scale.value /= SCALE_FACTOR
-        fitToScreen.value = false
-      }
-    })
+
+    function canvasZoom1 () {
+      scale.value = 1
+      fitToScreen.value = false
+    }
+    function canvasZoomFitToScreen () {
+      fitToScreen.value = true
+    }
+    function canvasZoomIn () {
+      scale.value *= SCALE_FACTOR
+      fitToScreen.value = false
+    }
+    function canvasZoomOut () {
+      scale.value /= SCALE_FACTOR
+      fitToScreen.value = false
+    }
 
     watch(fitToScreen, val => {
       if (val) {
@@ -172,7 +183,7 @@ export default defineComponent({
     })
 
     function wheelZoom (e: WheelEvent) {
-      if (e.deltaY === 0) return
+      if (e.deltaY === 0 || runtime.movingElement) return
 
       const rect = coord.value!.getBoundingClientRect()
 
@@ -203,6 +214,17 @@ export default defineComponent({
     const animatedPosX = ref(null as number | null)
     const animatedPosY = ref(null as number | null)
 
+    const pixelPerfectPosX = computed(() => {
+      var a = (editor_.value?.state.document.meta.size.width ?? 0) / 2 * scale.value
+
+      return Math.round(posX.value) + a - Math.round(a)
+    })
+    const pixelPerfectPosY = computed(() => {
+      var a = (editor_.value?.state.document.meta.size.height ?? 0) / 2 * scale.value
+
+      return Math.round(posY.value) + a - Math.round(a)
+    })
+
     const dragging = ref(false)
 
     var startClientX: number | null = null
@@ -214,7 +236,7 @@ export default defineComponent({
       var interactable = interact(root.value!)
         .styleCursor(false)
         .draggable({
-          mouseButtons: 4,
+          manualStart: true,
           listeners: {
             start (event: any) {
               startClientX = event.clientX
@@ -231,6 +253,8 @@ export default defineComponent({
               if (ax) ax.pause()
               if (ay) ay.pause()
 
+              actions.cursor = 'grabbing'
+
               dragging.value = true
               fitToScreen.value = false
             },
@@ -244,7 +268,20 @@ export default defineComponent({
               startPosX = null
               startPosY = null
 
+              actions.cursor = null
+
               dragging.value = false
+            }
+          }
+        })
+        .on('down', function (event) {
+          var interaction = event.interaction
+
+          // if the pointer was moved while being held down
+          // and an interaction hasn't started yet
+          if (interaction.pointerIsDown && !interaction.interacting()) {
+            if (event.buttons === 4) {
+              interaction.start({ name: 'drag' }, event.interactable, event.currentTarget)
             }
           }
         })
@@ -309,8 +346,14 @@ export default defineComponent({
     const scrollbarSizeX = computed(() => (root.value?.getBoundingClientRect().width ?? 0) / scrollViewRect.value.width)
     const scrollbarSizeY = computed(() => (root.value?.getBoundingClientRect().height ?? 0) / scrollViewRect.value.height)
 
+    const viewportWidth = ref(0)
+    const viewportHeight = ref(0)
+
     function updateScrollViewRect () {
       const rootRect = root.value!.getBoundingClientRect()
+
+      viewportWidth.value = rootRect.width
+      viewportHeight.value = rootRect.height
 
       const documentSize = {
         width: (editor_.value?.state?.document?.meta.size.width ?? 0) * scale.value,
@@ -397,20 +440,83 @@ export default defineComponent({
     onMounted(() => {
       interact(canvas.value!)
         .on('tap', (e: any) => {
-          if (editor_.value!.state.selection.hovering.length) {
-            editor_.value!.state.selection.selection = [
-              editor_.value!.state.selection.hovering[0]
-            ]
-          } else {
-            editor_.value!.state.selection.selection = []
+          // if (e.double) return
+
+          // Don't trigger if Tap originated in CanvasLayers
+          if (getElementPath(e.target).find(x => x.classList?.contains('dont-interact'))) return
+
+          if (e.button === 0) {
+            if (runtime.currentTab?.hovering.length) {
+              const el = runtime.currentTab?.hovering[0]
+
+              if (!editor_.value!.state.selection.selection.includes(el)) {
+                // Element isn't yet selected
+
+                if (e.shiftKey) {
+                  // Add hovering element to selection
+                  editor_.value!.state.selection.selection.push(el)
+                } else {
+                  // Set hovering element as selection
+                  editor_.value!.state.selection.selection = [el]
+                }
+
+                // Set editing element if its a text Node
+                // if (runtime.currentTab?.registeredElements[el]?.node?.type === NodeTypes.Text) {
+                //   editor_.value!.state.selection.editing = el
+                // }
+              } else if (e.shiftKey) {
+                // Element is already selected
+                // Remove element from selection
+                editor_.value!.state.selection.selection.splice(
+                  editor_.value!.state.selection.selection.indexOf(runtime.currentTab?.hovering[0]), 1)
+
+                // Unset editing element if it's deselected
+                if (editor_.value!.state.selection.editing === runtime.currentTab?.hovering[0]) {
+                  editor_.value!.state.selection.editing = null
+                }
+              }
+            } else {
+              // Unset selection
+              editor_.value!.state.selection.selection = []
+              editor_.value!.state.selection.editing = null
+            }
           }
         })
     })
+
+    function mousemove (e: MouseEvent) {
+      if (!runtime.currentTab) return
+
+      const rootRect = root.value!.getBoundingClientRect()
+
+      const docX = posX.value + (viewportWidth.value - (editor_.value?.state.document.meta.size.width ?? 0) * scale.value) * 0.5
+      const docY = posY.value + (viewportHeight.value - (editor_.value?.state.document.meta.size.height ?? 0) * scale.value) * 0.5
+
+      const x = (e.clientX - rootRect.x - docX) / scale.value
+      const y = (e.clientY - rootRect.y - docY) / scale.value
+
+      var elements = Object.values(runtime.currentTab?.registeredElements)
+
+      // console.log(elements)
+
+      runtime.currentTab.hovering = elements.filter(el => {
+        return el.boundingBox.x < x && el.boundingBox.x + (el.boundingBox.width ?? 0) > x &&
+          el.boundingBox.y < y && el.boundingBox.y + (el.boundingBox.height ?? 0) > y
+      }).sort(a => -(a.order ?? 0)).map(x => x.id)
+    }
+
+    // #endregion
+
+    // #region CONTEXTMENU
+
+    function contextmenu (e: MouseEvent) {
+    }
 
     // #endregion
 
     return {
       root,
+      canvasLayers,
       canvas,
       coord,
       editor_,
@@ -420,6 +526,8 @@ export default defineComponent({
       wheelZoom,
       posX,
       posY,
+      pixelPerfectPosX,
+      pixelPerfectPosY,
       animatedPosX,
       animatedPosY,
       dragging,
@@ -435,7 +543,11 @@ export default defineComponent({
       scrollYDragStart,
       scrollYDragMove,
       scrollYDragEnd,
-      scroll
+      scroll,
+      viewportWidth,
+      viewportHeight,
+      mousemove,
+      contextmenu
     }
   }
 })
@@ -470,6 +582,7 @@ export default defineComponent({
   }
 
   &__renderer {
+    overflow: visible;
     display: block;
     transform: translate(-50%, -50%);
 
