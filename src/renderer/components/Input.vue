@@ -132,6 +132,7 @@ export default defineComponent({
 
   &--number {
     cursor: ew-resize;
+    touch-action: none;
   }
 }
 </style>

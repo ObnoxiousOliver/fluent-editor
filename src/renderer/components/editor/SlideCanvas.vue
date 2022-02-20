@@ -69,7 +69,7 @@
 import { computed, defineComponent, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref, watch } from 'vue'
 
 import interact from 'interactjs'
-import anime from 'animejs'
+// import anime from 'animejs'
 import { clamp } from '@/renderer/utils/math'
 import getElementPath from '@/renderer/utils/getElementPath'
 
@@ -102,7 +102,7 @@ export default defineComponent({
     const runtime = useRuntime()
 
     // #region CANVAS NAVIGATION
-    const SCALE_FACTOR = 1.2
+    const SCALE_FACTOR = 1
     const SCALE_MIN = 0.01
     const SCALE_MAX = 100
     const PADDING = 50
@@ -189,8 +189,8 @@ export default defineComponent({
 
       if (scale.value >= SCALE_MIN && scale.value <= SCALE_MAX) {
         const scaleDelta = e.deltaY < 0
-          ? clamp(scale.value * SCALE_FACTOR, SCALE_MIN, SCALE_MAX) / scale.value
-          : clamp(scale.value / SCALE_FACTOR, SCALE_MIN, SCALE_MAX) / scale.value
+          ? clamp(scale.value * ((-e.deltaY / 100 + 1) * SCALE_FACTOR), SCALE_MIN, SCALE_MAX) / scale.value
+          : clamp(scale.value / ((e.deltaY / 100 + 1) * SCALE_FACTOR), SCALE_MIN, SCALE_MAX) / scale.value
 
         posX.value -= (e.clientX - rect.x) * scaleDelta - (e.clientX - rect.x)
         posY.value -= (e.clientY - rect.y) * scaleDelta - (e.clientY - rect.y)
@@ -201,8 +201,10 @@ export default defineComponent({
         }
       }
 
-      if (e.deltaY < 0) scale.value *= SCALE_FACTOR
-      else scale.value /= SCALE_FACTOR
+      if (e.deltaY < 0) scale.value *= (-e.deltaY / 100 + 1) * SCALE_FACTOR
+      else scale.value /= (e.deltaY / 100 + 1) * SCALE_FACTOR
+
+      console.log(e.deltaY, (e.deltaY / 100 + 1))
 
       fitToScreen.value = false
     }
@@ -302,31 +304,31 @@ export default defineComponent({
     var ax: any = null
     var ay: any = null
     function animatePos (targetX: number, targetY: number) {
-      if (animatedPosX.value === null) animatedPosX.value = posX.value
-      if (animatedPosY.value === null) animatedPosY.value = posY.value
+      // if (animatedPosX.value === null) animatedPosX.value = posX.value
+      // if (animatedPosY.value === null) animatedPosY.value = posY.value
 
-      if (ax) ax.pause()
-      if (ay) ay.pause()
+      // if (ax) ax.pause()
+      // if (ay) ay.pause()
 
-      ax = anime({
-        targets: animatedPosX,
-        value: targetX,
-        easing: 'easeOutQuad',
-        duration: 100,
-        complete () {
-          animatedPosX.value = null
-        }
-      })
+      // ax = anime({
+      //   targets: animatedPosX,
+      //   value: targetX,
+      //   easing: 'easeOutQuad',
+      //   duration: 100,
+      //   complete () {
+      //     animatedPosX.value = null
+      //   }
+      // })
 
-      ay = anime({
-        targets: animatedPosY,
-        value: targetY,
-        easing: 'easeOutQuad',
-        duration: 100,
-        complete () {
-          animatedPosY.value = null
-        }
-      })
+      // ay = anime({
+      //   targets: animatedPosY,
+      //   value: targetY,
+      //   easing: 'easeOutQuad',
+      //   duration: 100,
+      //   complete () {
+      //     animatedPosY.value = null
+      //   }
+      // })
 
       posX.value = targetX
       posY.value = targetY
