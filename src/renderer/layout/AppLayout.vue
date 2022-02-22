@@ -5,13 +5,13 @@
   />
   <div class="app-layout">
     <Titlebar class="app-layout__titlebar" />
-    <AppMenu class="app-layout__app-menu" />
+    <!-- <AppMenu class="app-layout__app-menu" /> -->
     <div class="app-layout__content">
       <slot />
     </div>
   </div>
 
-  <transition name="fade">
+  <!-- <transition name="fade">
     <div
       v-if="isBrowser && (docRect?.width < 800 || docRect?.height < 400)"
       class="small-window-warning"
@@ -26,23 +26,22 @@
         <p  class="small-window-warning__detail">
           {{ $t('smallWindowWarning.detail', [800, 400]) }}
         </p>
-        <!-- {{ Math.round(docRect?.width) }} x {{ Math.round(docRect?.height) }} -->
       </div>
     </div>
-  </transition>
+  </transition> -->
 </template>
 
 <script>
 import Titlebar from '../components/titlebar/Titlebar.vue'
-import AppMenu from '../components/appMenu/AppMenu.vue'
+// import AppMenu from '../components/appMenu/AppMenu.vue'
 
 import { isBrowser } from '../utils/browser'
 import { onBeforeUnmount, onMounted, ref } from '@vue/runtime-core'
 
 export default {
   components: {
-    Titlebar,
-    AppMenu
+    Titlebar
+    // AppMenu
   },
   setup () {
     const docRect = ref()

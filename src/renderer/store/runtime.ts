@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { useEditor } from '.'
 import ElementStoreInstance from '../models/editor/ElementStoreInstance'
-import RegistedElement from '../models/editor/RegistedElement'
+// import RegistedElement from '../models/editor/RegistedElement'
 
 export const useRuntime = defineStore('runtime', {
   state: () => ({
@@ -28,17 +28,5 @@ export const useRuntime = defineStore('runtime', {
 
       return this.tabs[editor.currentEditor.id]
     }
-    // currentTabsRegisteredElements () {
-    //   const registeredElements = this.currentTab?.registeredElements
-
-    //   if (!registeredElements) return {}
-    //   console.log(registeredElements)
-
-    //   const el: { [x: string]: RegistedElement } = {}
-
-    //   Object.keys(registeredElements).forEach(key => { el[key] = registeredElements[key]?.get() })
-
-    //   return el
-    // }
   }
 })

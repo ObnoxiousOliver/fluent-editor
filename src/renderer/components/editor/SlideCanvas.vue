@@ -7,7 +7,7 @@
     @wheel.stop.prevent.exact="wheel"
     @mousedown.middle="mousedown"
 
-    @mousemove="mousemove"
+    @pointermove="pointermove"
     @contextmenu="contextmenu"
 
     @scroll="scroll"
@@ -102,7 +102,7 @@ export default defineComponent({
     const runtime = useRuntime()
 
     // #region CANVAS NAVIGATION
-    const SCALE_FACTOR = 1
+    const SCALE_FACTOR = 1.5
     const SCALE_MIN = 0.01
     const SCALE_MAX = 100
     const PADDING = 50
@@ -188,9 +188,7 @@ export default defineComponent({
       const rect = coord.value!.getBoundingClientRect()
 
       if (scale.value >= SCALE_MIN && scale.value <= SCALE_MAX) {
-        const scaleDelta = e.deltaY < 0
-          ? clamp(scale.value * ((-e.deltaY / 100 + 1) * SCALE_FACTOR), SCALE_MIN, SCALE_MAX) / scale.value
-          : clamp(scale.value / ((e.deltaY / 100 + 1) * SCALE_FACTOR), SCALE_MIN, SCALE_MAX) / scale.value
+        const scaleDelta = clamp(scale.value * SCALE_FACTOR ** (-e.deltaY / 100), SCALE_MIN, SCALE_MAX) / scale.value
 
         posX.value -= (e.clientX - rect.x) * scaleDelta - (e.clientX - rect.x)
         posY.value -= (e.clientY - rect.y) * scaleDelta - (e.clientY - rect.y)
@@ -201,10 +199,9 @@ export default defineComponent({
         }
       }
 
-      if (e.deltaY < 0) scale.value *= (-e.deltaY / 100 + 1) * SCALE_FACTOR
-      else scale.value /= (e.deltaY / 100 + 1) * SCALE_FACTOR
+      // console.log(e)
 
-      console.log(e.deltaY, (e.deltaY / 100 + 1))
+      scale.value *= SCALE_FACTOR ** (-e.deltaY / 100)
 
       fitToScreen.value = false
     }
@@ -428,7 +425,7 @@ export default defineComponent({
 
     // Handle Overflow scrolling
     function scroll (e: any) {
-      console.log(e)
+      // console.log(e)
       posX.value -= root.value!.scrollLeft
       posY.value -= root.value!.scrollTop
       root.value!.scrollLeft = 0
@@ -438,18 +435,50 @@ export default defineComponent({
     // #endregion
     // #endregion
 
-    // #region SELECTION
+    var scaleStart: number | null
     onMounted(() => {
       interact(canvas.value!)
+        //  Gesture
+        .gesturable({
+          listeners: {
+            start () {
+              scaleStart = scale.value
+            },
+            move (e: any) {
+              const rect = coord.value!.getBoundingClientRect()
+
+              if (scale.value >= SCALE_MIN && scale.value <= SCALE_MAX) {
+                const scaleDelta = clamp(scaleStart! * e.scale, SCALE_MIN, SCALE_MAX) / scale.value
+
+                posX.value -= (e.client.x - rect.x) * scaleDelta - (e.client.x - rect.x)
+                posY.value -= (e.client.y - rect.y) * scaleDelta - (e.client.y - rect.y)
+
+                if (startPosX && startPosY) {
+                  startPosX -= (e.client.x - rect.x) * scaleDelta - (e.client.x - rect.x)
+                  startPosY -= (e.client.y - rect.y) * scaleDelta - (e.client.y - rect.y)
+                }
+              }
+
+              posX.value += e.delta.x
+              posY.value += e.delta.y
+
+              scale.value = scaleStart! * e.scale
+            }
+          }
+        })
+        // SELECTION
         .on('tap', (e: any) => {
           // if (e.double) return
+          if (editor_.value?.state.activeTool !== 'selection') return
 
           // Don't trigger if Tap originated in CanvasLayers
           if (getElementPath(e.target).find(x => x.classList?.contains('dont-interact'))) return
 
+          var hovering = elementsAtPointOnScreen(e.clientX, e.clientY)
+
           if (e.button === 0) {
-            if (runtime.currentTab?.hovering.length) {
-              const el = runtime.currentTab?.hovering[0]
+            if (hovering.length) {
+              const el = hovering[0]
 
               if (!editor_.value!.state.selection.selection.includes(el)) {
                 // Element isn't yet selected
@@ -470,10 +499,10 @@ export default defineComponent({
                 // Element is already selected
                 // Remove element from selection
                 editor_.value!.state.selection.selection.splice(
-                  editor_.value!.state.selection.selection.indexOf(runtime.currentTab?.hovering[0]), 1)
+                  editor_.value!.state.selection.selection.indexOf(hovering[0]), 1)
 
                 // Unset editing element if it's deselected
-                if (editor_.value!.state.selection.editing === runtime.currentTab?.hovering[0]) {
+                if (editor_.value!.state.selection.editing === hovering[0]) {
                   editor_.value!.state.selection.editing = null
                 }
               }
@@ -486,28 +515,36 @@ export default defineComponent({
         })
     })
 
-    function mousemove (e: MouseEvent) {
+    function pointermove (e: PointerEvent) {
+      if (e.pointerType === 'touch') return
       if (!runtime.currentTab) return
+
+      runtime.currentTab.hovering = elementsAtPointOnScreen(e.clientX, e.clientY)
+    }
+
+    function elementsAtPointOnScreen (clientX: number, clientY: number): string[] {
+      if (!runtime.currentTab) return []
 
       const rootRect = root.value!.getBoundingClientRect()
 
       const docX = posX.value + (viewportWidth.value - (editor_.value?.state.document.meta.size.width ?? 0) * scale.value) * 0.5
       const docY = posY.value + (viewportHeight.value - (editor_.value?.state.document.meta.size.height ?? 0) * scale.value) * 0.5
 
-      const x = (e.clientX - rootRect.x - docX) / scale.value
-      const y = (e.clientY - rootRect.y - docY) / scale.value
+      const x = (clientX - rootRect.x - docX) / scale.value
+      const y = (clientY - rootRect.y - docY) / scale.value
 
       var elements = Object.values(runtime.currentTab?.registeredElements)
 
       // console.log(elements)
 
-      runtime.currentTab.hovering = elements.filter(el => {
+      var hovering = elements.filter(el => {
         return el.boundingBox.x < x && el.boundingBox.x + (el.boundingBox.width ?? 0) > x &&
           el.boundingBox.y < y && el.boundingBox.y + (el.boundingBox.height ?? 0) > y
       }).sort(a => -(a.order ?? 0)).map(x => x.id)
-    }
 
-    // #endregion
+      // console.log(hovering)
+      return hovering
+    }
 
     // #region CONTEXTMENU
 
@@ -548,7 +585,7 @@ export default defineComponent({
       scroll,
       viewportWidth,
       viewportHeight,
-      mousemove,
+      pointermove,
       contextmenu
     }
   }

@@ -1,4 +1,5 @@
 import { useActions, useEditor } from '../store'
+import { config } from './config'
 
 declare const global: any
 
@@ -6,13 +7,13 @@ export default function setup () {
   const actions = useActions()
 
   // App Navigation
-  actions.addAction({
-    id: 'focus-app-menu',
-    keyboardShortcuts: [
-      ['alt']
-    ],
-    executeInAppMenu: true
-  })
+  // actions.addAction({
+  //   id: 'focus-app-menu',
+  //   keyboardShortcuts: [
+  //     ['alt']
+  //   ],
+  //   executeInAppMenu: true
+  // })
 
   actions.addAction({
     id: 'exit',
@@ -20,10 +21,18 @@ export default function setup () {
     hooks: [() => { global.electron.window.close() }]
   })
 
+  // Color Theme
   actions.addAction({
-    id: 'toggle-dark-mode',
-    keyboardShortcuts: [['ctrl', 'space']],
-    hooks: [() => document.documentElement.classList.toggle('dark')]
+    id: 'set-theme-dark',
+    hooks: [() => config.set('theme', 'dark')]
+  })
+  actions.addAction({
+    id: 'set-theme-light',
+    hooks: [() => config.set('theme', 'light')]
+  })
+  actions.addAction({
+    id: 'set-theme-system',
+    hooks: [() => config.set('theme', null)]
   })
 
   actions.addAction({

@@ -80,11 +80,11 @@ export default defineComponent({
     }
 
     &--hierachie {
-      width: 350px;
+      width: 250px;
       grid-column: 1 / 2;
     }
     &--properties {
-      width: 350px;
+      width: 300px;
       grid-column: 3 / 4;
     }
 

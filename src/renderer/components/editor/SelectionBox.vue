@@ -169,7 +169,7 @@ export default defineComponent({
         /* var interaction = */ interact(el.value)
           .styleCursor(false)
           .draggable({
-            hold: x === 'move',
+            // hold: x === 'move',
             autoScroll: true,
             listeners: {
               start () {

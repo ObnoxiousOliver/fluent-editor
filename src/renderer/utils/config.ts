@@ -65,6 +65,11 @@ export const config = {
     }
 
     listeners[channel].push(listener)
+  },
+  watch (path: string, cb: Function) {
+    this.on('update', (p: string) => {
+      if (p === path) cb(this.get(p))
+    })
   }
 }
 

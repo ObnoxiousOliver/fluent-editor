@@ -2,15 +2,17 @@
   <div
     :class="['scroll-viewer', {
       'scroll-viewer--x': x,
-      'scroll-viewer--y': y
+      'scroll-viewer--y': y,
+      'scroll-viewer--scrolling': scrolling
     }]"
-    @mouseenter="updateScrollSize"
+    @pointerenter="updateScrollSize"
   >
     <div
       ref="scroller"
       class="scroll-viewer__scroller"
       @scroll="scroll"
       @change="change"
+      @wheel="wheel"
     >
       <div
         ref="content"
@@ -48,7 +50,8 @@ export default {
   props: {
     x: { type: Boolean, default: () => true },
     y: { type: Boolean, default: () => true },
-    thin: Boolean
+    thin: Boolean,
+    horizontalScroll: Boolean
   },
 
   setup (props) {
@@ -60,6 +63,8 @@ export default {
     const scrollY = ref(false)
     const scrollX = ref(false)
 
+    const scrolling = ref(false)
+
     const scrollTop = ref(0)
     const scrollLeft = ref(0)
     const scrollHeight = ref(0)
@@ -67,9 +72,17 @@ export default {
     const offsetHeight = ref(0)
     const offsetWidth = ref(0)
 
+    var timeout
     function scroll (e) {
       scrollTop.value = scroller.value.scrollTop
       scrollLeft.value = scroller.value.scrollLeft
+      scrolling.value = true
+
+      clearTimeout(timeout)
+
+      timeout = setTimeout(() => {
+        scrolling.value = false
+      }, 500)
     }
 
     function scrollbarScrollVertical (e) {
@@ -93,6 +106,12 @@ export default {
       scrollY.value = props.y && scroller.value.scrollHeight > scroller.value.offsetHeight
     }
 
+    function wheel (e) {
+      if (props.horizontalScroll) {
+        scroller.value.scrollLeft += e.deltaY
+      }
+    }
+
     onMounted(() => {
       observer.observe(content.value)
       observer.observe(scroller.value)
@@ -107,6 +126,7 @@ export default {
       scroller,
       scrollY,
       scrollX,
+      scrolling,
       scrollTop,
       scrollLeft,
       scrollHeight,
@@ -116,7 +136,8 @@ export default {
       scroll,
       scrollbarScrollVertical,
       scrollbarScrollHorizontal,
-      updateScrollSize
+      updateScrollSize,
+      wheel
     }
   }
 }
@@ -152,6 +173,10 @@ export default {
     height: 0;
   }
 
+  &__content {
+    min-height: 100%;
+  }
+
   .scrollbar {
     z-index: 1;
     opacity: 0;
@@ -167,7 +192,7 @@ export default {
     }
   }
 
-  &:hover .scrollbar, .scrollbar--dragging {
+  &--scrolling .scrollbar, &:hover .scrollbar, .scrollbar--dragging {
     opacity: 1;
     transition: opacity .1s;
   }

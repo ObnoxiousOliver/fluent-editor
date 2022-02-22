@@ -7,7 +7,13 @@
     >
       <bi i="house-door-fill" />
     </TabButton>
-    <div class="tab-btns__tabs">
+    <ScrollViewer
+      :x="true"
+      :y="false"
+      :thin="true"
+      :horizontalScroll="true"
+      class="tab-btns__scrollviewer"
+    >
       <TabButton
         v-for="(tab, i) in editor.tabs"
         :key="tab.id"
@@ -33,7 +39,7 @@
           />
         </svg>
       </button>
-    </div>
+    </ScrollViewer>
   </div>
 </template>
 
@@ -43,10 +49,12 @@ import TabButton from './TabButton.vue'
 import { useI18n } from 'vue-i18n'
 import { defineComponent } from '@vue/runtime-core'
 import EditorInstance from '@/renderer/models/editor/EditorInstance'
+import ScrollViewer from '../scrollViewer/ScrollViewer.vue'
 
 export default defineComponent({
   components: {
-    TabButton
+    TabButton,
+    ScrollViewer
   },
 
   setup (props) {
@@ -75,18 +83,13 @@ export default defineComponent({
   // padding: 0 5px;
   gap: 1px;
 
-  &__tabs {
+  &__scrollviewer {
     flex: 1 1 auto;
     width: 0;
 
+    :deep(.scroll-viewer__content) {
     display: flex;
     gap: 1px;
-    overflow: auto hidden;
-
-    &::-webkit-scrollbar {
-      appearance: none;
-      width: 0;
-      height: 0;
     }
   }
 
