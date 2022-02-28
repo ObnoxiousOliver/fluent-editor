@@ -29,7 +29,10 @@
         :placeholder="$t('document.slide', [editor_.state.activeSlide + 1])"
       />
     </div>
-    <div class="canvas-layers__selections">
+    <div
+      v-if="editor_.state.activeTool === 'selection'"
+      class="canvas-layers__selections"
+    >
       <EditingBox
         v-if="editor_.state.selection.editing"
         :key="editor_.state.selection.editing"

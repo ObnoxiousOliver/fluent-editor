@@ -49,7 +49,16 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+@use '../../scss' as r;
+
 .properties-panel {
+  @include r.light {
+    background: r.$col-white;
+  }
+  @include r.dark {
+    background: r.$col-700;
+  }
+
   &__content {
     padding: 10px 0;
   }

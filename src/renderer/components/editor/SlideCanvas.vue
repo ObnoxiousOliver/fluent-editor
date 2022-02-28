@@ -600,6 +600,13 @@ export default defineComponent({
   overflow: hidden;
   touch-action: none;
 
+  @include r.light {
+    background: r.$col-100;
+  }
+  @include r.dark {
+    background: r.$col-800;
+  }
+
   &__canvas {
     position: absolute;
     inset: 0;
