@@ -69,6 +69,7 @@
 import { computed, defineComponent, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref, watch } from 'vue'
 
 import interact from 'interactjs'
+import { Interactable } from '@interactjs/core/Interactable'
 // import anime from 'animejs'
 import { clamp } from '@/renderer/utils/math'
 import getElementPath from '@/renderer/utils/getElementPath'
@@ -79,6 +80,7 @@ import EditorInstance from '@/renderer/models/editor/EditorInstance'
 import SlideRenderer from '@/renderer/components/document/SlideRenderer.vue'
 import ScrollBar from '../scrollViewer/ScrollBar.vue'
 import CanvasLayers from './CanvasLayers.vue'
+import ToolExtention, { tools } from '@/renderer/models/editor/tools/Tool'
 // import NodeTypes from '@/renderer/models/nodes/NodeTypes'
 
 export default defineComponent({
@@ -107,7 +109,10 @@ export default defineComponent({
     const SCALE_MAX = 100
     const PADDING = 50
 
-    const fitToScreen = ref(true)
+    const fitToScreen = computed({
+      get: () => editor_.value?.state.canvas.fixToScreen ?? false,
+      set: val => { if (editor_.value) editor_.value.state.canvas.fixToScreen = val }
+    })
 
     onActivated(() => {
       actions.hook('canvas-zoom-1', canvasZoom1)
@@ -169,7 +174,10 @@ export default defineComponent({
     }
 
     // #region Zoom
-    const scale = ref(props.zoomFactor)
+    const scale = computed({
+      get: () => editor_.value?.state.canvas.scale ?? 1,
+      set: val => { if (editor_.value) editor_.value.state.canvas.scale = val }
+    })
 
     watch(scale, () => {
       scale.value = clamp(scale.value, SCALE_MIN, SCALE_MAX)
@@ -208,8 +216,14 @@ export default defineComponent({
     // #endregion
 
     // #region Move
-    const posX = ref(0)
-    const posY = ref(0)
+    const posX = computed({
+      get: () => editor_.value?.state.canvas.posX ?? 0,
+      set: val => { if (editor_.value) editor_.value.state.canvas.posX = val }
+    })
+    const posY = computed({
+      get: () => editor_.value?.state.canvas.posY ?? 0,
+      set: val => { if (editor_.value) editor_.value.state.canvas.posY = val }
+    })
     const animatedPosX = ref(null as number | null)
     const animatedPosY = ref(null as number | null)
 
@@ -436,8 +450,10 @@ export default defineComponent({
     // #endregion
 
     var scaleStart: number | null
+    var interaction: Interactable
+    var canvasInteraction: Interactable
     onMounted(() => {
-      interact(canvas.value!)
+      interaction = interact(canvas.value!)
         //  Gesture
         .gesturable({
           listeners: {
@@ -513,6 +529,28 @@ export default defineComponent({
             }
           }
         })
+
+      canvasInteraction = interact(canvas.value!)
+
+      if (tool.value?.interact) {
+        tool.value.interact(canvasInteraction, editor_.value)
+      }
+    })
+    onBeforeUnmount(() => {
+      interaction.unset()
+    })
+
+    // Initialize Interaction on active Tool
+    const activeTool = computed(() => editor_.value?.state.activeTool)
+    const tool = computed(() => tools[activeTool.value ?? ''] as ToolExtention | undefined)
+
+    watch(tool, () => {
+      canvasInteraction.unset()
+      canvasInteraction = interact(canvas.value!)
+
+      if (tool.value?.interact) {
+        tool.value.interact(canvasInteraction, editor_.value)
+      }
     })
 
     function pointermove (e: PointerEvent) {
