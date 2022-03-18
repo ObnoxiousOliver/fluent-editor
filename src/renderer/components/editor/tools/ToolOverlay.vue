@@ -2,6 +2,8 @@
   <component
     v-if="tool?.overlayComponent"
     :editor="editor_"
+    :canvas="canvas"
+    :overlay="overlay"
     :is="tool.overlayComponent"
   />
 </template>
@@ -13,7 +15,9 @@ import ToolExtention, { tools } from '@/renderer/models/editor/tools/Tool'
 
 export default defineComponent({
   props: {
-    editor: Object
+    editor: Object,
+    canvas: Object,
+    overlay: Object
   },
 
   setup (props) {

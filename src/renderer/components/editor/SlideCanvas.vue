@@ -34,6 +34,8 @@
         :posY="Math.round(posY)" -->
         <CanvasLayers
           ref="canvasLayers"
+          :canvas="$refs.canvas"
+          :overlay="$refs.canvasOverlay"
           :editor="editor_"
           :scale="scale"
           :posX="pixelPerfectPosX"
@@ -43,6 +45,11 @@
           class="slide-canvas__layers"
         />
       </div>
+
+      <div
+        class="slide-canvas__canvas__overlay"
+        ref="canvasOverlay"
+      />
     </div>
     <ScrollBar
       :class="$bem('slide-canvas__scrollbar', 'vertical')"
@@ -454,7 +461,7 @@ export default defineComponent({
     var canvasInteraction: Interactable
     onMounted(() => {
       interaction = interact(canvas.value!)
-        //  Gesture
+        // Gesture
         .gesturable({
           listeners: {
             start () {
@@ -544,15 +551,22 @@ export default defineComponent({
     const activeTool = computed(() => editor_.value?.state.activeTool)
     const tool = computed(() => tools[activeTool.value ?? ''] as ToolExtention | undefined)
 
-    watch(tool, () => {
-      canvasInteraction.unset()
-      canvasInteraction = interact(canvas.value!)
+    watch(tool, (val, old) => {
+      // Call deactivated event on last Tool
+      if (old?.deactivated) {
+        old.deactivated(editor_.value)
+      }
 
+      // Create new canvas interacton
+      canvasInteraction.set({})
+
+      // Call interact event
       if (tool.value?.interact) {
         tool.value.interact(canvasInteraction, editor_.value)
       }
     })
 
+    // Calculate Element Hovering the mouse cursor is hovering
     function pointermove (e: PointerEvent) {
       if (e.pointerType === 'touch') return
       if (!runtime.currentTab) return
@@ -648,6 +662,12 @@ export default defineComponent({
   &__canvas {
     position: absolute;
     inset: 0;
+
+    &__overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
   }
 
   &__coord-system {

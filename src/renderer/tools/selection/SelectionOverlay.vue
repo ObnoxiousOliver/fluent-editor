@@ -1,8 +1,5 @@
 <template>
-  <div
-    v-if="editor.state.activeTool === 'selection'"
-    class="canvas-layers__selections"
-  >
+  <div class="selection">
     <EditingBox
       v-if="editor.state.selection.editing"
       :key="editor.state.selection.editing"
@@ -12,9 +9,10 @@
     />
     <div v-else>
       <HoverBox
-        v-if="runtime.currentTab?.hovering[0] && !editor.state.selection.selection.includes(runtime.currentTab.hovering[0])"
-        :key="runtime.currentTab?.hovering[0]"
-        :elementId="runtime.currentTab?.hovering[0]"
+        v-if="runtime.tabs[editor.id]?.hovering[0] &&
+          !editor.state.selection.selection.includes(runtime.tabs[editor.id].hovering[0])"
+        :key="runtime.tabs[editor.id]?.hovering[0]"
+        :elementId="runtime.tabs[editor.id]?.hovering[0]"
         :scale="editor.state.canvas.scale"
         :editor="editor"
       />
@@ -28,6 +26,22 @@
         :editor="editor"
       />
     </div>
+
+    <teleport
+      v-if="overlay"
+      :to="overlay"
+    >
+      <div
+        v-if="runtime.tabs[editor.id].toolData.rect"
+        class="box-selection"
+        :style="{
+          top: top + 'px',
+          left: left + 'px',
+          width: runtime.tabs[editor.id].toolData.rect?.width + 'px',
+          height: runtime.tabs[editor.id].toolData.rect?.height + 'px'
+        }"
+      />
+    </teleport>
   </div>
 </template>
 
@@ -36,7 +50,7 @@ import EditingBox from '@/renderer/components/editor/EditingBox.vue'
 import HoverBox from '@/renderer/components/editor/HoverBox.vue'
 import SelectionBox from '@/renderer/components/editor/SelectionBox.vue'
 import { useRuntime } from '@/renderer/store'
-import { defineComponent } from 'vue'
+import { computed, defineComponent } from 'vue'
 
 export default defineComponent({
   components: {
@@ -46,15 +60,45 @@ export default defineComponent({
   },
   props: {
     editor: Object,
-    box: Object
+    canvas: Object,
+    overlay: Object
   },
 
-  setup () {
+  setup (props) {
     const runtime = useRuntime()
 
+    const top = computed(() => {
+      if (!runtime.tabs[props.editor!.id].toolData.rect) return null
+
+      const rect: DOMRect = props.canvas?.getBoundingClientRect()
+
+      return runtime.tabs[props.editor!.id].toolData.rect?.y - rect.y /* - props.editor!.state.canvas.posY - (rect.height - props.editor!.state.canvas.scale * props.editor!.state.document.meta.size.height) / 2 */
+    })
+    const left = computed(() => {
+      if (!runtime.tabs[props.editor!.id].toolData.rect) return null
+
+      const rect: DOMRect = props.canvas?.getBoundingClientRect()
+
+      return runtime.tabs[props.editor!.id].toolData.rect?.x - rect.x /* - props.editor!.state.canvas.posX - (rect.width - props.editor!.state.canvas.scale * props.editor!.state.document.meta.size.width) / 2 */
+    })
+
     return {
-      runtime
+      runtime,
+      top,
+      left
     }
   }
 })
 </script>
+
+<style lang="scss" scoped>
+@use '../../scss' as r;
+
+.box-selection {
+  position: absolute;
+
+  background: rgba(r.$col-selection, 0.1);
+  border: r.$col-selection solid 1px;
+  pointer-events: none;
+}
+</style>

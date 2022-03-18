@@ -5,6 +5,7 @@ export default interface ToolExtention {
 
   overlayComponent?: any,
 
+  deactivated?(editor: any): void
   interact?(interaction: Interactable, editor: any): void
 
   // onBox?(): void,
