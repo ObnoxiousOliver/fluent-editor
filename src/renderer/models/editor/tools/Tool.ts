@@ -1,12 +1,17 @@
 import { Interactable } from '@interactjs/types'
 
+export interface ToolSetupArguments {
+  interaction: Interactable,
+  editor: any
+}
+
 export default interface ToolExtention {
   name: string,
 
   overlayComponent?: any,
 
   deactivated?(editor: any): void
-  interact?(interaction: Interactable, editor: any): void
+  setup?(args: ToolSetupArguments): void
 
   // onBox?(): void,
   // onTap?(): void

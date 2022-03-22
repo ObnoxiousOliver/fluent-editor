@@ -76,8 +76,6 @@
 import { computed, defineComponent, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref, watch } from 'vue'
 
 import interact from 'interactjs'
-import { Interactable } from '@interactjs/core/Interactable'
-// import anime from 'animejs'
 import { clamp } from '@/renderer/utils/math'
 import getElementPath from '@/renderer/utils/getElementPath'
 
@@ -457,10 +455,17 @@ export default defineComponent({
     // #endregion
 
     var scaleStart: number | null
-    var interaction: Interactable
-    var canvasInteraction: Interactable
     onMounted(() => {
-      interaction = interact(canvas.value!)
+      setCanvasInteraction()
+      setupTool()
+    })
+    onBeforeUnmount(() => {
+      interact(canvas.value!).unset()
+    })
+
+    function setCanvasInteraction () {
+      interact(canvas.value!).unset()
+      interact(canvas.value!)
         // Gesture
         .gesturable({
           listeners: {
@@ -490,12 +495,14 @@ export default defineComponent({
           }
         })
         // SELECTION
-        .on('tap', (e: any) => {
-          // if (e.double) return
+        .on('down', (e: any) => {
           if (editor_.value?.state.activeTool !== 'selection') return
+          if (e.buttons !== 1) return
 
           // Don't trigger if Tap originated in CanvasLayers
           if (getElementPath(e.target).find(x => x.classList?.contains('dont-interact'))) return
+
+          console.log(e)
 
           var hovering = elementsAtPointOnScreen(e.clientX, e.clientY)
 
@@ -536,20 +543,21 @@ export default defineComponent({
             }
           }
         })
-
-      canvasInteraction = interact(canvas.value!)
-
-      if (tool.value?.interact) {
-        tool.value.interact(canvasInteraction, editor_.value)
-      }
-    })
-    onBeforeUnmount(() => {
-      interaction.unset()
-    })
+    }
 
     // Initialize Interaction on active Tool
     const activeTool = computed(() => editor_.value?.state.activeTool)
     const tool = computed(() => tools[activeTool.value ?? ''] as ToolExtention | undefined)
+
+    function setupTool () {
+      // Call setup event
+      if (tool.value?.setup) {
+        tool.value.setup({
+          interaction: interact(canvas.value!),
+          editor: editor_.value
+        })
+      }
+    }
 
     watch(tool, (val, old) => {
       // Call deactivated event on last Tool
@@ -558,12 +566,9 @@ export default defineComponent({
       }
 
       // Create new canvas interacton
-      canvasInteraction.set({})
+      setCanvasInteraction()
 
-      // Call interact event
-      if (tool.value?.interact) {
-        tool.value.interact(canvasInteraction, editor_.value)
-      }
+      setupTool()
     })
 
     // Calculate Element Hovering the mouse cursor is hovering
