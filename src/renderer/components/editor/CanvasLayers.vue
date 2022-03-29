@@ -29,36 +29,11 @@
         :placeholder="$t('document.slide', [editor_.state.activeSlide + 1])"
       />
     </div>
-    <div
-      v-if="editor_.state.activeTool === 'selection'"
-      class="canvas-layers__selections"
-    >
-      <EditingBox
-        v-if="editor_.state.selection.editing"
-        :key="editor_.state.selection.editing"
-        :elementId="editor_.state.selection.editing"
-        :scale="scale"
-        :editor="editor_"
-      />
-      <div v-else>
-        <HoverBox
-          v-if="runtime.currentTab?.hovering[0] && !editor_.state.selection.selection.includes(runtime.currentTab.hovering[0])"
-          :key="runtime.currentTab?.hovering[0]"
-          :elementId="runtime.currentTab?.hovering[0]"
-          :scale="scale"
-          :editor="editor_"
-        />
-        <SelectionBox
-          v-for="element in editor_.state.selection.selection"
-          :key="element"
-          :elementId="element"
-          :scale="scale"
-          :posX="posX"
-          :posY="posY"
-          :editor="editor_"
-        />
-      </div>
-    </div>
+    <ToolOverlay
+      :editor="editor_"
+      :canvas="canvas"
+      :overlay="overlay"
+    />
   </div>
 </template>
 
@@ -68,19 +43,22 @@ import { useRuntime } from '@/renderer/store'
 import { computed, defineComponent, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 // import { useI18n } from 'vue-i18n'
 import DoubleClickInput from '../DoubleClickInput.vue'
-import EditingBox from './EditingBox.vue'
-import HoverBox from './HoverBox.vue'
-import SelectionBox from './SelectionBox.vue'
+import ToolOverlay from './tools/ToolOverlay.vue'
 
 export default defineComponent({
-  components: { DoubleClickInput, SelectionBox, HoverBox, EditingBox },
+  components: {
+    DoubleClickInput,
+    ToolOverlay
+  },
   props: {
     editor: Object,
     scale: Number,
     posX: Number,
     posY: Number,
     viewportWidth: Number,
-    viewportHeight: Number
+    viewportHeight: Number,
+    canvas: Object,
+    overlay: Object
   },
 
   setup (props) {

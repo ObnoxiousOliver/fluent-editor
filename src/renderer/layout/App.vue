@@ -19,10 +19,13 @@ import { defineComponent, onBeforeUnmount, onMounted } from '@vue/runtime-core'
 import keybindManager from '../utils/keybindManager'
 import setupActions from '../utils/setupActions'
 
-import { useActions, useEditor } from '../store'
+import { useActions, useEditor, useRuntime } from '../store'
 import AppLayout from './AppLayout.vue'
 import AppTabsView from './AppTabsView.vue'
 import { config } from '../utils/config'
+import { extendTool } from '../models/editor/tools/Tool'
+import { SelectionTool } from '../tools/selection/selection'
+import { TextBoxTool } from '../tools/textbox/textbox'
 // import HomeView from './HomeView.vue'
 // import Editor from './editor/EditorView.vue'
 
@@ -38,11 +41,13 @@ export default defineComponent({
 
   setup () {
     const editorStore = useEditor()
+    const runtime = useRuntime()
     const actions = useActions()
 
     // Sync document store with local storage
     try {
       editorStore.$patch(JSON.parse(localStorage.getItem('editorState') ?? ''))
+      editorStore.tabs.forEach(x => runtime.addTab(x.id))
     } catch {}
 
     editorStore.$subscribe((_, state) => {
@@ -79,6 +84,10 @@ export default defineComponent({
           document.documentElement.classList.remove(prefersDark ? 'light' : 'dark')
       }
     }
+
+    // Handle Tools
+    extendTool(SelectionTool)
+    extendTool(TextBoxTool)
 
     return {
       actions,

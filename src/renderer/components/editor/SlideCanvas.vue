@@ -34,6 +34,8 @@
         :posY="Math.round(posY)" -->
         <CanvasLayers
           ref="canvasLayers"
+          :canvas="$refs.canvas"
+          :overlay="$refs.canvasOverlay"
           :editor="editor_"
           :scale="scale"
           :posX="pixelPerfectPosX"
@@ -43,6 +45,11 @@
           class="slide-canvas__layers"
         />
       </div>
+
+      <div
+        class="slide-canvas__canvas__overlay"
+        ref="canvasOverlay"
+      />
     </div>
     <ScrollBar
       :class="$bem('slide-canvas__scrollbar', 'vertical')"
@@ -69,7 +76,6 @@
 import { computed, defineComponent, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref, watch } from 'vue'
 
 import interact from 'interactjs'
-// import anime from 'animejs'
 import { clamp } from '@/renderer/utils/math'
 import getElementPath from '@/renderer/utils/getElementPath'
 
@@ -79,6 +85,7 @@ import EditorInstance from '@/renderer/models/editor/EditorInstance'
 import SlideRenderer from '@/renderer/components/document/SlideRenderer.vue'
 import ScrollBar from '../scrollViewer/ScrollBar.vue'
 import CanvasLayers from './CanvasLayers.vue'
+import ToolExtention, { tools } from '@/renderer/models/editor/tools/Tool'
 // import NodeTypes from '@/renderer/models/nodes/NodeTypes'
 
 export default defineComponent({
@@ -107,7 +114,10 @@ export default defineComponent({
     const SCALE_MAX = 100
     const PADDING = 50
 
-    const fitToScreen = ref(true)
+    const fitToScreen = computed({
+      get: () => editor_.value?.state.canvas.fixToScreen ?? false,
+      set: val => { if (editor_.value) editor_.value.state.canvas.fixToScreen = val }
+    })
 
     onActivated(() => {
       actions.hook('canvas-zoom-1', canvasZoom1)
@@ -169,7 +179,10 @@ export default defineComponent({
     }
 
     // #region Zoom
-    const scale = ref(props.zoomFactor)
+    const scale = computed({
+      get: () => editor_.value?.state.canvas.scale ?? 1,
+      set: val => { if (editor_.value) editor_.value.state.canvas.scale = val }
+    })
 
     watch(scale, () => {
       scale.value = clamp(scale.value, SCALE_MIN, SCALE_MAX)
@@ -208,8 +221,14 @@ export default defineComponent({
     // #endregion
 
     // #region Move
-    const posX = ref(0)
-    const posY = ref(0)
+    const posX = computed({
+      get: () => editor_.value?.state.canvas.posX ?? 0,
+      set: val => { if (editor_.value) editor_.value.state.canvas.posX = val }
+    })
+    const posY = computed({
+      get: () => editor_.value?.state.canvas.posY ?? 0,
+      set: val => { if (editor_.value) editor_.value.state.canvas.posY = val }
+    })
     const animatedPosX = ref(null as number | null)
     const animatedPosY = ref(null as number | null)
 
@@ -437,8 +456,17 @@ export default defineComponent({
 
     var scaleStart: number | null
     onMounted(() => {
+      setCanvasInteraction()
+      setupTool()
+    })
+    onBeforeUnmount(() => {
+      interact(canvas.value!).unset()
+    })
+
+    function setCanvasInteraction () {
+      interact(canvas.value!).unset()
       interact(canvas.value!)
-        //  Gesture
+        // Gesture
         .gesturable({
           listeners: {
             start () {
@@ -467,12 +495,14 @@ export default defineComponent({
           }
         })
         // SELECTION
-        .on('tap', (e: any) => {
-          // if (e.double) return
+        .on('down', (e: any) => {
           if (editor_.value?.state.activeTool !== 'selection') return
+          if (e.buttons !== 1) return
 
           // Don't trigger if Tap originated in CanvasLayers
           if (getElementPath(e.target).find(x => x.classList?.contains('dont-interact'))) return
+
+          // console.log(e)
 
           var hovering = elementsAtPointOnScreen(e.clientX, e.clientY)
 
@@ -513,8 +543,38 @@ export default defineComponent({
             }
           }
         })
+    }
+
+    // Initialize Interaction on active Tool
+    const activeTool = computed(() => editor_.value?.state.activeTool)
+    const tool = computed(() => tools[activeTool.value ?? ''] as ToolExtention | undefined)
+
+    function setupTool () {
+      // Call setup event
+      if (tool.value?.setup) {
+        tool.value.setup({
+          interaction: interact(canvas.value!),
+          editor: editor_,
+          root: root,
+          viewportWidth: viewportWidth,
+          viewportHeight: viewportHeight
+        })
+      }
+    }
+
+    watch(tool, (val, old) => {
+      // Call deactivated event on last Tool
+      if (old?.deactivated) {
+        old.deactivated(editor_.value)
+      }
+
+      // Create new canvas interacton
+      setCanvasInteraction()
+
+      setupTool()
     })
 
+    // Calculate Element Hovering the mouse cursor is hovering
     function pointermove (e: PointerEvent) {
       if (e.pointerType === 'touch') return
       if (!runtime.currentTab) return
@@ -610,6 +670,12 @@ export default defineComponent({
   &__canvas {
     position: absolute;
     inset: 0;
+
+    &__overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
   }
 
   &__coord-system {

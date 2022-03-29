@@ -52,13 +52,6 @@ export default defineComponent({
     function updateRegisteredElement () {
       if (!props.editor) return
 
-      if (!runtime.tabs[props.editor.id]) {
-        runtime.tabs[props.editor.id] = {
-          hovering: [],
-          registeredElements: {}
-        }
-      }
-
       if (!props.node) return
 
       const node = props.node as Node

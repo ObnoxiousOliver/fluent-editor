@@ -10,6 +10,6 @@ export interface TextNode {
 
 export default function createTextNode (rect: Rect, name?: string, id?: string) {
   return new Node(NodeTypes.Text, {
-    content: generateJSON('Hello World', [FluentTiptapKit])
+    content: generateJSON('', [FluentTiptapKit])
   } as TextNode, rect, name, id)
 }

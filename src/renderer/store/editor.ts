@@ -7,6 +7,7 @@ import { createEditorState } from '../models/editor/EditorState'
 import Rect from '../models/nodes/Rect'
 import createTextNode from '../models/nodes/TextNode'
 import randomId from '../utils/randomId'
+import { useRuntime } from './runtime'
 
 export const useEditor = defineStore('editor', {
   state: () => ({
@@ -39,6 +40,8 @@ export const useEditor = defineStore('editor', {
         history: []
       })
       this.currentTab = this.tabs.length
+
+      this.tabs.forEach(x => useRuntime().addTab(x.id))
     },
     closeTab (i: number) {
       this.tabs.splice(i, 1)
