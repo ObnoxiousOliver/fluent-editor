@@ -1,6 +1,7 @@
 import { defineTool } from '@/renderer/models/editor/tools/Tool'
 import Rect from '@/renderer/models/nodes/Rect'
 import { useRuntime } from '@/renderer/store'
+import { clientToDoc } from '@/renderer/utils/clientToDoc'
 import getElementPath from '@/renderer/utils/getElementPath'
 
 import SelectionOverlay from './SelectionOverlay.vue'
@@ -52,20 +53,6 @@ export const SelectionTool = defineTool({
       return box1.p + box1.length >= box2.p && box2.p + box2.length >= box1.p
     }
 
-    function clientToDoc (x: number, y: number): { x: number, y: number } {
-      const { scale, posX, posY } = editor.value.state.canvas
-
-      const docX = posX - (editor.value.state.document.meta.size.width ?? 0) * scale * 0.5
-      const docY = posY - (editor.value.state.document.meta.size.height ?? 0) * scale * 0.5
-
-      const rootRect = root.value!.getBoundingClientRect()
-
-      return {
-        x: (x - rootRect.x - docX) / scale - viewportWidth.value * 0.5 / scale,
-        y: (y - rootRect.y - docY) / scale - viewportHeight.value * 0.5 / scale
-      }
-    }
-
     let dragValid = false
 
     let docX0: number
@@ -78,7 +65,7 @@ export const SelectionTool = defineTool({
         start (e) {
           dragValid = false
 
-          const p = clientToDoc(e.client.x, e.client.y)
+          const p = clientToDoc({ editor, root, viewportWidth, viewportHeight }, e.client.x, e.client.y)
           docX0 = p.x
           docY0 = p.y
         },
@@ -90,9 +77,7 @@ export const SelectionTool = defineTool({
             dragValid = true
           }
 
-          const doc = clientToDoc(e.client.x, e.client.y)
-
-          const { scale } = editor.value.state.canvas
+          const doc = clientToDoc({ editor, root, viewportWidth, viewportHeight }, e.client.x, e.client.y)
 
           runtime.tabs[editor.value.id].toolData.rect = {
             x: Math.min(doc.x, docX0),

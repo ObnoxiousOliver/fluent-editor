@@ -9,10 +9,10 @@
     />
     <div v-else>
       <HoverBox
-        v-if="runtime.tabs[editor.id]?.hovering[0] &&
-          !editor.state.selection.selection.includes(runtime.tabs[editor.id].hovering[0])"
-        :key="runtime.tabs[editor.id]?.hovering[0]"
-        :elementId="runtime.tabs[editor.id]?.hovering[0]"
+        v-for="id in runtime.tabs[editor.id]?.hovering
+          .filter((x, i) => !editor.state.selection.selection.includes(x) && i === 0)"
+        :key="id"
+        :elementId="id"
         :scale="editor.state.canvas.scale"
         :editor="editor"
       />

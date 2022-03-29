@@ -25,6 +25,7 @@ import AppTabsView from './AppTabsView.vue'
 import { config } from '../utils/config'
 import { extendTool } from '../models/editor/tools/Tool'
 import { SelectionTool } from '../tools/selection/selection'
+import { TextBoxTool } from '../tools/textbox/textbox'
 // import HomeView from './HomeView.vue'
 // import Editor from './editor/EditorView.vue'
 
@@ -86,6 +87,7 @@ export default defineComponent({
 
     // Handle Tools
     extendTool(SelectionTool)
+    extendTool(TextBoxTool)
 
     return {
       actions,

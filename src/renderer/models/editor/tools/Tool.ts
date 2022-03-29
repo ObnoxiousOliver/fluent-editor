@@ -25,6 +25,10 @@ export const tools: {
   [x: string]: ToolExtention
 } = {}
 
+/**
+ * extend Tool in App.vue
+ * @param tool
+ */
 export function extendTool (tool: ToolExtention) {
   tools[tool.name] = tool
 }
