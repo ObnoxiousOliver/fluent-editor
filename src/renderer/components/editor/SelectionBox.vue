@@ -1,7 +1,7 @@
 <template>
   <div
     :class="{
-      'selection-box': true,
+      'selection-box dont-interact': true,
       'moving': moving,
       'resizeing-n': resizeingN,
       'resizeing-e': resizeingE,
@@ -166,10 +166,9 @@ export default defineComponent({
         let startPosX: number
         let startPosY: number
 
-        /* var interaction = */ interact(el.value)
+        interact(el.value)
           .styleCursor(false)
           .draggable({
-            // hold: x === 'move',
             autoScroll: true,
             listeners: {
               start () {
@@ -267,7 +266,9 @@ export default defineComponent({
                 resizeingW.value = false
               }
             }
-          }).on('tap', () => {
+          }).on('tap', (e: any) => {
+            if (e.button !== 0) return
+
             if (editor_.value) {
               editor_.value.state.selection.editing = props.elementId ?? null
             }

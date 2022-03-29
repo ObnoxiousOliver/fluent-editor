@@ -34,6 +34,8 @@
         :posY="Math.round(posY)" -->
         <CanvasLayers
           ref="canvasLayers"
+          :canvas="$refs.canvas"
+          :overlay="$refs.canvasOverlay"
           :editor="editor_"
           :scale="scale"
           :posX="pixelPerfectPosX"
@@ -43,6 +45,11 @@
           class="slide-canvas__layers"
         />
       </div>
+
+      <div
+        class="slide-canvas__canvas__overlay"
+        ref="canvasOverlay"
+      />
     </div>
     <ScrollBar
       :class="$bem('slide-canvas__scrollbar', 'vertical')"
@@ -69,8 +76,6 @@
 import { computed, defineComponent, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref, watch } from 'vue'
 
 import interact from 'interactjs'
-import { Interactable } from '@interactjs/core/Interactable'
-// import anime from 'animejs'
 import { clamp } from '@/renderer/utils/math'
 import getElementPath from '@/renderer/utils/getElementPath'
 
@@ -450,11 +455,18 @@ export default defineComponent({
     // #endregion
 
     var scaleStart: number | null
-    var interaction: Interactable
-    var canvasInteraction: Interactable
     onMounted(() => {
-      interaction = interact(canvas.value!)
-        //  Gesture
+      setCanvasInteraction()
+      setupTool()
+    })
+    onBeforeUnmount(() => {
+      interact(canvas.value!).unset()
+    })
+
+    function setCanvasInteraction () {
+      interact(canvas.value!).unset()
+      interact(canvas.value!)
+        // Gesture
         .gesturable({
           listeners: {
             start () {
@@ -483,12 +495,14 @@ export default defineComponent({
           }
         })
         // SELECTION
-        .on('tap', (e: any) => {
-          // if (e.double) return
+        .on('down', (e: any) => {
           if (editor_.value?.state.activeTool !== 'selection') return
+          if (e.buttons !== 1) return
 
           // Don't trigger if Tap originated in CanvasLayers
           if (getElementPath(e.target).find(x => x.classList?.contains('dont-interact'))) return
+
+          // console.log(e)
 
           var hovering = elementsAtPointOnScreen(e.clientX, e.clientY)
 
@@ -529,30 +543,38 @@ export default defineComponent({
             }
           }
         })
-
-      canvasInteraction = interact(canvas.value!)
-
-      if (tool.value?.interact) {
-        tool.value.interact(canvasInteraction, editor_.value)
-      }
-    })
-    onBeforeUnmount(() => {
-      interaction.unset()
-    })
+    }
 
     // Initialize Interaction on active Tool
     const activeTool = computed(() => editor_.value?.state.activeTool)
     const tool = computed(() => tools[activeTool.value ?? ''] as ToolExtention | undefined)
 
-    watch(tool, () => {
-      canvasInteraction.unset()
-      canvasInteraction = interact(canvas.value!)
-
-      if (tool.value?.interact) {
-        tool.value.interact(canvasInteraction, editor_.value)
+    function setupTool () {
+      // Call setup event
+      if (tool.value?.setup) {
+        tool.value.setup({
+          interaction: interact(canvas.value!),
+          editor: editor_,
+          root: root,
+          viewportWidth: viewportWidth,
+          viewportHeight: viewportHeight
+        })
       }
+    }
+
+    watch(tool, (val, old) => {
+      // Call deactivated event on last Tool
+      if (old?.deactivated) {
+        old.deactivated(editor_.value)
+      }
+
+      // Create new canvas interacton
+      setCanvasInteraction()
+
+      setupTool()
     })
 
+    // Calculate Element Hovering the mouse cursor is hovering
     function pointermove (e: PointerEvent) {
       if (e.pointerType === 'touch') return
       if (!runtime.currentTab) return
@@ -648,6 +670,12 @@ export default defineComponent({
   &__canvas {
     position: absolute;
     inset: 0;
+
+    &__overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
   }
 
   &__coord-system {

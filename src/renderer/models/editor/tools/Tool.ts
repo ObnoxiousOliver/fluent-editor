@@ -1,11 +1,21 @@
 import { Interactable } from '@interactjs/types'
+import { Ref } from 'vue'
+
+export interface ToolSetupArguments {
+  interaction: Interactable,
+  editor: Ref<any>,
+  root: Ref<HTMLElement | null>,
+  viewportWidth: Ref<number>,
+  viewportHeight: Ref<number>
+}
 
 export default interface ToolExtention {
   name: string,
 
   overlayComponent?: any,
 
-  interact?(interaction: Interactable, editor: any): void
+  deactivated?(editor: any): void
+  setup?(args: ToolSetupArguments): void
 
   // onBox?(): void,
   // onTap?(): void

@@ -29,7 +29,11 @@
         :placeholder="$t('document.slide', [editor_.state.activeSlide + 1])"
       />
     </div>
-    <ToolOverlay :editor="editor_" />
+    <ToolOverlay
+      :editor="editor_"
+      :canvas="canvas"
+      :overlay="overlay"
+    />
   </div>
 </template>
 
@@ -52,7 +56,9 @@ export default defineComponent({
     posX: Number,
     posY: Number,
     viewportWidth: Number,
-    viewportHeight: Number
+    viewportHeight: Number,
+    canvas: Object,
+    overlay: Object
   },
 
   setup (props) {
