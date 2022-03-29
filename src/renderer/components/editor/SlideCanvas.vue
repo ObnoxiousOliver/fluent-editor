@@ -502,7 +502,7 @@ export default defineComponent({
           // Don't trigger if Tap originated in CanvasLayers
           if (getElementPath(e.target).find(x => x.classList?.contains('dont-interact'))) return
 
-          console.log(e)
+          // console.log(e)
 
           var hovering = elementsAtPointOnScreen(e.clientX, e.clientY)
 
@@ -554,7 +554,10 @@ export default defineComponent({
       if (tool.value?.setup) {
         tool.value.setup({
           interaction: interact(canvas.value!),
-          editor: editor_.value
+          editor: editor_,
+          root: root,
+          viewportWidth: viewportWidth,
+          viewportHeight: viewportHeight
         })
       }
     }

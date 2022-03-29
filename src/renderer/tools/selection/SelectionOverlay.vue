@@ -27,21 +27,16 @@
       />
     </div>
 
-    <teleport
-      v-if="overlay"
-      :to="overlay"
-    >
-      <div
-        v-if="runtime.tabs[editor.id].toolData.rect"
-        class="box-selection"
-        :style="{
-          top: top + 'px',
-          left: left + 'px',
-          width: runtime.tabs[editor.id].toolData.rect?.width + 'px',
-          height: runtime.tabs[editor.id].toolData.rect?.height + 'px'
-        }"
-      />
-    </teleport>
+    <div
+      v-if="runtime.tabs[editor.id].toolData.rect"
+      class="box-selection"
+      :style="{
+        top: top * editor.state.canvas.scale + 'px',
+        left: left * editor.state.canvas.scale + 'px',
+        width: runtime.tabs[editor.id].toolData.rect?.width * editor.state.canvas.scale + 'px',
+        height: runtime.tabs[editor.id].toolData.rect?.height * editor.state.canvas.scale + 'px'
+      }"
+    />
   </div>
 </template>
 
@@ -70,16 +65,12 @@ export default defineComponent({
     const top = computed(() => {
       if (!runtime.tabs[props.editor!.id].toolData.rect) return null
 
-      const rect: DOMRect = props.canvas?.getBoundingClientRect()
-
-      return runtime.tabs[props.editor!.id].toolData.rect?.y - rect.y /* - props.editor!.state.canvas.posY - (rect.height - props.editor!.state.canvas.scale * props.editor!.state.document.meta.size.height) / 2 */
+      return runtime.tabs[props.editor!.id].toolData.rect?.y
     })
     const left = computed(() => {
       if (!runtime.tabs[props.editor!.id].toolData.rect) return null
 
-      const rect: DOMRect = props.canvas?.getBoundingClientRect()
-
-      return runtime.tabs[props.editor!.id].toolData.rect?.x - rect.x /* - props.editor!.state.canvas.posX - (rect.width - props.editor!.state.canvas.scale * props.editor!.state.document.meta.size.width) / 2 */
+      return runtime.tabs[props.editor!.id].toolData.rect?.x
     })
 
     return {

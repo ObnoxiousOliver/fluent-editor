@@ -1,8 +1,12 @@
 import { Interactable } from '@interactjs/types'
+import { Ref } from 'vue'
 
 export interface ToolSetupArguments {
   interaction: Interactable,
-  editor: any
+  editor: Ref<any>,
+  root: Ref<HTMLElement | null>,
+  viewportWidth: Ref<number>,
+  viewportHeight: Ref<number>
 }
 
 export default interface ToolExtention {
