@@ -2,7 +2,8 @@ import { createApp } from 'vue'
 
 // Plugins
 import { createPinia } from 'pinia'
-import { createI18n, useI18n } from 'vue-i18n'
+import { createI18n } from 'vue-i18n'
+import VueInlineSvg from 'vue-inline-svg'
 
 // Components
 import App from './layout/App.vue'
@@ -11,6 +12,7 @@ import ProptertiesPanelItem from './components/properties/ProptertiesPanelItem.v
 import FluentInput from './components/Input.vue'
 import FluentNumberInput from './components/NumberInput.vue'
 import Bi from './components/Bi.vue'
+import Oi from './components/Oi.vue'
 
 // Utils
 import bem from './utils/bem'
@@ -45,8 +47,10 @@ const i18n = createI18n({
 createApp(App)
   .use(pinia)
   .use(i18n)
+  .use(VueInlineSvg.InlineSvgPlugin)
   .mixin({ created () { this.$bem = bem } })
   .component('bi', Bi)
+  .component('oi', Oi)
   .component('FluentInput', FluentInput)
   .component('FluentNumberInput', FluentNumberInput)
   .component('NodeDisplay', NodeDisplay)

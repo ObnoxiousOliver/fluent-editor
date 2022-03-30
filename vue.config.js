@@ -1,4 +1,7 @@
 module.exports = {
+  configureWebpack: {
+
+  },
   pages: {
     index: {
       entry: 'src/renderer/index.ts'

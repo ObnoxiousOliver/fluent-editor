@@ -8,6 +8,8 @@ import { useRuntime } from '@/renderer/store'
 
 export const TextBoxTool = defineTool({
   name: 'textbox',
+  icon: 'text',
+
   overlayComponent: CreateTextBoxOverlay,
 
   setup ({ editor, interaction, root, viewportWidth, viewportHeight }) {

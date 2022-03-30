@@ -11,6 +11,7 @@ export interface ToolSetupArguments {
 
 export default interface ToolExtention {
   name: string,
+  icon?: string,
 
   overlayComponent?: any,
 

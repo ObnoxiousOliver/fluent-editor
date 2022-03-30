@@ -8,6 +8,7 @@ import SelectionOverlay from './SelectionOverlay.vue'
 
 export const SelectionTool = defineTool({
   name: 'selection',
+  icon: 'cursor',
   overlayComponent: SelectionOverlay,
   deactivated (editor) {
     editor.state.selection.editing = null

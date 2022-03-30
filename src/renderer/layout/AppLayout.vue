@@ -82,7 +82,7 @@ export default {
     background: r.$col-100;
   }
   @include r.dark {
-    background: r.$col-800;
+    background: r.$col-900;
   }
 }
 
