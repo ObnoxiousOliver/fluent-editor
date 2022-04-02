@@ -88,7 +88,9 @@ export default {
 
 .app-layer {
   z-index: 9999;
-  position: absolute;
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
 }
 
 .small-window-warning {
