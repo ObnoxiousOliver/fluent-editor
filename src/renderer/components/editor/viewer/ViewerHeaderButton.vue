@@ -1,20 +1,31 @@
 <template>
-  <button
+  <div
     :class="['viewer-header-btn', {
       'viewer-header-btn--active': active,
       'viewer-header-btn--multiple': multiple
     }]"
   >
-    <div class="viewer-header-btn__content">
-      <slot />
-      <div
-        v-if="multiple"
-        class="viewer-header-btn__arrow"
-      >
-        <oi i="chevron-small-down" />
+    <button
+      @click="$emit('button:click')"
+      class="viewer-header-btn__button"
+    >
+      <div class="viewer-header-btn__button__content">
+        <slot />
       </div>
-    </div>
-  </button>
+    </button>
+    <button
+      v-if="multiple"
+      @click="$emit('arrow:click')"
+      class="viewer-header-btn__arrow"
+    >
+      <div class="viewer-header-btn__arrow__content">
+        <oi
+          class="viewer-header-btn__arrow__icon"
+          i="chevron-small-down"
+        />
+      </div>
+    </button>
+  </div>
 </template>
 
 <script lang="ts">
@@ -30,54 +41,89 @@ export default {
 @use '../../../scss' as r;
 
 .viewer-header-btn {
-  @include r.buttonReset;
-  cursor: pointer;
+  display: grid;
+  grid-auto-flow: column;
 
-  padding: 5px 2.5px;
+  &__button {
+    @include r.buttonReset;
+    padding: 5px 2.5px;
 
-  @include r.light {
-    color: r.$col-400;
+    cursor: pointer;
+
+    @include r.light {
+      color: r.$col-400;
+    }
+    @include r.dark {
+      color: r.$col-300;
+    }
+
+    &__content {
+      width: 30px;
+    }
   }
-  @include r.dark {
-    color: r.$col-300;
+
+  &__button, &__arrow {
+    &__content {
+      display: grid;
+      place-content: center;
+
+      height: 100%;
+      border-radius: 5px;
+
+      transition: color .2s, background .2s;
+    }
   }
 
-  &__content {
-    width: 30px;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 5px;
+  &__arrow {
+    @include r.buttonReset;
+
+    cursor: pointer;
+
+    @include r.light {
+      color: r.$col-400;
+    }
+    @include r.dark {
+      color: r.$col-300;
+    }
 
     transition: color .2s, background .2s;
-  }
+    padding: 5px 2.5px 5px 0;
 
-  &:hover:not(.viewer-header-btn--active) {
-    .viewer-header-btn__content {
-      @include r.light {
-        background: r.$col-100;
-        color: r.$col-800;
-      }
-      @include r.dark {
-        background: r.$col-600;
-        color: r.$col-white;
+    &__icon {
+      transition: transform .2s;
+    }
+
+    &__content {
+      border-radius: 0 5px 5px 0;
+      padding-left: 2px;
+      padding-right: 5px;
+    }
+
+    &:hover {
+      .viewer-header-btn__arrow__icon {
+        transform: translateY(2px);
       }
     }
   }
-  &:hover:active:not(.viewer-header-btn--active) {
-    .viewer-header-btn__content {
-      @include r.light {
-        background: r.$col-100;
-      }
-      @include r.dark {
-        background: r.$col-800;
+
+  &:hover:not(.viewer-header-btn--active) {
+    .viewer-header-btn {
+      &__button__content, &__arrow__content {
+        @include r.light {
+          background: r.$col-400;
+          color: r.$col-800;
+        }
+        @include r.dark {
+          background: r.$col-600;
+          color: r.$col-white;
+        }
       }
     }
   }
 
   &--active {
-    .viewer-header-btn__content {
+    .viewer-header-btn__button__content,
+    .viewer-header-btn__arrow__content {
       @include r.light {
         background: r.$col-100;
         color: r.$col-primary;
@@ -91,10 +137,14 @@ export default {
 
   &--multiple {
     .viewer-header-btn {
-      &__content {
-        gap: 2px;
-        width: auto;
-        padding: 0 5px;
+      &__button {
+        padding: 5px 0 5px 2.5px;
+
+        &__content {
+          width: auto;
+          padding-left: 5px;
+          border-radius: 5px 0 0 5px;
+        }
       }
     }
   }
