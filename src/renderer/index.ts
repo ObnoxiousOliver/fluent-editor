@@ -3,7 +3,6 @@ import { createApp } from 'vue'
 // Plugins
 import { createPinia } from 'pinia'
 import { createI18n } from 'vue-i18n'
-import VueInlineSvg from 'vue-inline-svg'
 
 // Components
 import App from './layout/App.vue'
@@ -47,7 +46,6 @@ const i18n = createI18n({
 createApp(App)
   .use(pinia)
   .use(i18n)
-  .use(VueInlineSvg.InlineSvgPlugin)
   .mixin({ created () { this.$bem = bem } })
   .component('bi', Bi)
   .component('oi', Oi)
