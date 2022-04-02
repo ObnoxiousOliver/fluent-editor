@@ -30,7 +30,7 @@
         class="viewer-header__zoom"
         :multiple="true"
       >
-        <span class="viewer-header__zoom__text">100%</span>
+        <span class="viewer-header__zoom__text">{{ Math.round(editor_.state.canvas.scale * 100) }}%</span>
       </ViewerHeaderButton>
     </div>
   </div>
