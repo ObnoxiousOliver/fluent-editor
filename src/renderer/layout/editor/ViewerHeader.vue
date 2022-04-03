@@ -1,37 +1,68 @@
 <template>
   <div class="viewer-header">
     <div class="viewer-header__start">
-      <ViewerHeaderButton>
-        <oi i="arrow-counterclockwise" />
-      </ViewerHeaderButton>
-      <ViewerHeaderButton>
-        <oi i="arrow-clockwise" />
-      </ViewerHeaderButton>
+      <!-- Undo / Redo Buttons -->
+      <Popper placement="bottom">
+        <ViewerHeaderButton>
+          <oi i="arrow-counterclockwise" />
+        </ViewerHeaderButton>
+
+        <template #content>
+          {{ $t('editor.undo') }}
+        </template>
+      </Popper>
+      <Popper placement="bottom">
+        <ViewerHeaderButton>
+          <oi i="arrow-clockwise" />
+        </ViewerHeaderButton>
+
+        <template #content>
+          {{ $t('editor.redo') }}
+        </template>
+      </Popper>
 
       <div class="viewer-header__divider" />
 
-      <ViewerHeaderButton
+      <!-- Tool Buttons -->
+      <Popper
         v-for="tool in tools"
         :key="tool.name"
-        :active="tool.name === editor_.state.activeTool"
-        @click="editor_.state.activeTool = tool.name"
+        placement="bottom"
       >
-        <oi :i="tool.icon" />
-      </ViewerHeaderButton>
+        <ViewerHeaderButton
+          :active="tool.name === editor_.state.activeTool"
+          @click="editor_.state.activeTool = tool.name"
+        >
+          <oi :i="tool.icon" />
+        </ViewerHeaderButton>
+
+        <template #content>
+          {{ $t('editor.tools.' + tool.name) }}
+        </template>
+      </Popper>
     </div>
+
     <div class="viewer-header__end">
       <Popper placement="bottom">
         <ViewerHeaderButton>
           <oi i="floppy" />
         </ViewerHeaderButton>
-        <template #content>Save</template>
+
+        <template #content>
+          {{ $t('editor.file.save') }}
+        </template>
       </Popper>
+
       <Popper placement="bottom">
         <ViewerHeaderButton>
           <oi i="play" />
         </ViewerHeaderButton>
-        <template #content>Preview Presenation</template>
+
+        <template #content>
+          {{ $t('editor.play') }}
+        </template>
       </Popper>
+
       <Popper placement="bottom">
         <ViewerHeaderButton
           class="viewer-header__zoom"
@@ -39,7 +70,10 @@
         >
           <span class="viewer-header__zoom__text">{{ Math.round(editor_.state.canvas.scale * 100) }}%</span>
         </ViewerHeaderButton>
-        <template #content>Zoom options</template>
+
+        <template #content>
+          {{ $t('editor.canvas.zoomOptions') }}
+        </template>
       </Popper>
     </div>
   </div>
