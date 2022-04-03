@@ -15,6 +15,7 @@ import Oi from './components/Oi.vue'
 
 // Utils
 import bem from './utils/bem'
+import mq from './utils/mq'
 
 // I18n
 import langEn from './i18n/en'
@@ -46,6 +47,7 @@ const i18n = createI18n({
 createApp(App)
   .use(pinia)
   .use(i18n)
+  .use(mq)
   .mixin({ created () { this.$bem = bem } })
   .component('bi', Bi)
   .component('oi', Oi)
