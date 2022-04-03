@@ -21,6 +21,7 @@
     "animejs": "^3.2.1",
     "chokidar": "^3.5.3",
     "core-js": "^3.6.5",
+    "firebase": "^9.6.10",
     "interactjs": "^1.10.11",
     "keycode": "^2.2.1",
     "mathjs": "^10.1.1",

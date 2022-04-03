@@ -1,5 +1,8 @@
 import { createApp } from 'vue'
 
+// Initialize Firebase
+import './firebase'
+
 // Plugins
 import { createPinia } from 'pinia'
 import { createI18n } from 'vue-i18n'
