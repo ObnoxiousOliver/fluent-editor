@@ -1,6 +1,7 @@
 <template>
   <AppLayout>
-    <AppTabsView :tabindex="editorStore.currentTab" />
+    <!-- <AppTabsView :tabindex="editorStore.currentTab" /> -->
+    <router-view />
   </AppLayout>
 
   <teleport to="head">
@@ -19,24 +20,20 @@ import { defineComponent, onBeforeUnmount, onMounted } from '@vue/runtime-core'
 import keybindManager from '../utils/keybindManager'
 import setupActions from '../utils/setupActions'
 
-import { useActions, useEditor, useRuntime } from '../store'
+import { useActions, useEditor, useRuntime, useUserState } from '../store'
 import AppLayout from './AppLayout.vue'
-import AppTabsView from './AppTabsView.vue'
 import { config } from '../utils/config'
 import { extendTool } from '../models/editor/tools/Tool'
 import { SelectionTool } from '../tools/selection/selection'
 import { TextBoxTool } from '../tools/textbox/textbox'
+import { getAuth, onAuthStateChanged } from '@firebase/auth'
 // import HomeView from './HomeView.vue'
 // import Editor from './editor/EditorView.vue'
 
 export default defineComponent({
   name: 'App',
   components: {
-    AppLayout,
-    AppTabsView
-    // HomeView,
-    // Editor
-    // SlideRenderer
+    AppLayout
   },
 
   setup () {
@@ -54,9 +51,9 @@ export default defineComponent({
       localStorage.setItem('editorState', JSON.stringify(state))
     })
 
+    // Handle Actions
     setupActions()
 
-    // Handle Actions
     onMounted(() => {
       var { dispose } = keybindManager.initialize()
 
@@ -88,6 +85,16 @@ export default defineComponent({
     // Handle Tools
     extendTool(SelectionTool)
     extendTool(TextBoxTool)
+
+    // Handle Authorisation
+    const userState = useUserState()
+
+    onMounted(() => {
+      // Update User Login Status
+      onAuthStateChanged(getAuth(), (user) => {
+        userState.isLoggedIn = !!user
+      })
+    })
 
     return {
       actions,

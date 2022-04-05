@@ -6,6 +6,7 @@ import './firebase'
 // Plugins
 import { createPinia } from 'pinia'
 import { createI18n } from 'vue-i18n'
+import { router } from './router'
 
 // Components
 import App from './layout/App.vue'
@@ -50,6 +51,7 @@ const i18n = createI18n({
 createApp(App)
   .use(pinia)
   .use(i18n)
+  .use(router)
   .use(mq)
   .mixin({ created () { this.$bem = bem } })
   .component('bi', Bi)

@@ -25,13 +25,13 @@ export default {
 
       setKeys()
 
-      if (keys.length) {
-        console.log('%c[Pressed Keys]', 'color: #3ef;', keys.map(x => keycode(x)).join(', '))
-      }
-
       if (e.composedPath().some((x: any) => x.tagName === 'INPUT' || x.isContentEditable) &&
         !keys.map(x => keycode(x)).find(x => ['ctrl', 'alt', 'left command', 'right command'].includes(x))) {
         return
+      }
+
+      if (keys.length) {
+        console.log('%c[Pressed Keys]', 'color: #3ef;', keys.map(x => keycode(x)).join(', '))
       }
 
       if (actionStore.getKeyboardShortcuts
