@@ -79,16 +79,18 @@ export default {
   }
 
   @include r.light {
-    background: r.$col-50;
+    background: r.$col-100;
   }
   @include r.dark {
-    background: r.$col-800;
+    background: r.$col-900;
   }
 }
 
 .app-layer {
   z-index: 9999;
-  position: absolute;
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
 }
 
 .small-window-warning {

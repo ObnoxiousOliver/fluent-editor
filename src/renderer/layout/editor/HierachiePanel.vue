@@ -25,6 +25,14 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+@use '../../scss' as r;
+
 .hierachie {
+  @include r.light {
+    background: r.$col-white;
+  }
+  @include r.dark {
+    background: r.$col-700;
+  }
 }
 </style>

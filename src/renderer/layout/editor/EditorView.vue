@@ -67,13 +67,6 @@ export default defineComponent({
   &__panel {
     position: relative;
 
-    @include r.light {
-      background: r.$col-white;
-    }
-    @include r.dark {
-      background: r.$col-700;
-    }
-
     & > * {
       position: absolute;
       inset: 0;
@@ -89,13 +82,6 @@ export default defineComponent({
     }
 
     &--viewer {
-      @include r.light {
-        background: r.$col-100;
-      }
-      @include r.dark {
-        background: r.$col-800;
-      }
-
       grid-column: 2 / 3;
     }
 

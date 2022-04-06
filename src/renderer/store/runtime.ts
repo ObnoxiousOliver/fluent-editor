@@ -16,6 +16,15 @@ export const useRuntime = defineStore('runtime', {
       if (!state) return
 
       return state.document.slides[state.activeSlide].children.map(mapChildren).flat(Infinity).indexOf(id)
+    },
+    addTab (id: string) {
+      if (!this.tabs[id]) {
+        this.tabs[id] = {
+          hovering: [],
+          registeredElements: {},
+          toolData: {}
+        }
+      }
     }
   },
   getters: {

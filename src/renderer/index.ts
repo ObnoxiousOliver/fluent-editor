@@ -1,8 +1,12 @@
 import { createApp } from 'vue'
 
+// Initialize Firebase
+import './firebase'
+
 // Plugins
 import { createPinia } from 'pinia'
-import { createI18n, useI18n } from 'vue-i18n'
+import { createI18n } from 'vue-i18n'
+import { router } from './router'
 
 // Components
 import App from './layout/App.vue'
@@ -11,9 +15,11 @@ import ProptertiesPanelItem from './components/properties/ProptertiesPanelItem.v
 import FluentInput from './components/Input.vue'
 import FluentNumberInput from './components/NumberInput.vue'
 import Bi from './components/Bi.vue'
+import Oi from './components/Oi.vue'
 
 // Utils
 import bem from './utils/bem'
+import mq from './utils/mq'
 
 // I18n
 import langEn from './i18n/en'
@@ -45,8 +51,11 @@ const i18n = createI18n({
 createApp(App)
   .use(pinia)
   .use(i18n)
+  .use(router)
+  .use(mq)
   .mixin({ created () { this.$bem = bem } })
   .component('bi', Bi)
+  .component('oi', Oi)
   .component('FluentInput', FluentInput)
   .component('FluentNumberInput', FluentNumberInput)
   .component('NodeDisplay', NodeDisplay)

@@ -4,5 +4,6 @@ export default interface ElementStoreInstance {
   registeredElements: {
     [x: string]: RegistedElement
   },
-  hovering: string[]
+  hovering: string[],
+  toolData: any
 }
