@@ -4,19 +4,36 @@
       v-if="!isBrowser"
       class="titlebar__drag"
     />
-    <div class="titlebar__controls">
-      <FluentInput
-        class="titlebar__search dark"
-        :placeholder="t('search.placeholder')"
-      >
-        <template #after>
-          <bi i="search" />
-        </template>
-      </FluentInput>
+    <div class="titlebar__content">
       <div
-        v-if="!isBrowser"
-        class="titlebar__control__divider"
-      />
+        v-if="userState.isLoggedIn"
+        class="titlebar__controls"
+      >
+        <FluentInput
+          class="titlebar__search dark"
+          :placeholder="t('search.placeholder')"
+        >
+          <template #after>
+            <oi i="search" />
+          </template>
+        </FluentInput>
+        <Popper
+          ref="userMenu"
+          placement="bottom-end"
+          type="popup"
+        >
+          <UserAvatar
+            @click="$refs.userMenu.toggle()"
+            class="titlebar__avatar"
+            :user="userState.user"
+          />
+          <template #content>
+            <UserMenu
+              :user="userState.user"
+            />
+          </template>
+        </Popper>
+      </div>
       <div
         v-if="!isBrowser"
         class="titlebar__window-controls"
@@ -25,69 +42,42 @@
           @click="minimize()"
           class="titlebar__control"
         >
-          <svg
-            width="12"
-            height="12"
-          >
-            <path
-              stroke="currentColor"
-              d="M1 6.5 l10 0"
-            />
-          </svg>
+          <oi i="window-minimize" />
         </div>
         <div
           @click="toggleMaximize()"
           class="titlebar__control"
         >
-          <svg
+          <oi
             v-if="isMaximized"
-            width="13"
-            height="13"
-          >
-            <path
-              fill="none"
-              stroke="currentColor"
-              d="M3.5 3.5 l0 -2 8 0 0 8 -2 0 M1.5 3.5 l8 0 0 8 -8 0Z"
-            />
-          </svg>
-          <svg
+            i="window-restore"
+          />
+          <oi
             v-else
-            width="12"
-            height="12"
-          >
-            <path
-              fill="none"
-              stroke="currentColor"
-              d="M1.5 1.5 l9 0 0 9 -9 0Z"
-            />
-          </svg>
+            i="window-maximize"
+          />
         </div>
         <div
           @click="close()"
           class="titlebar__control titlebar__control--danger"
         >
-          <svg
-            width="12"
-            height="12"
-          >
-            <path
-              fill="currentColor"
-              d="M11 1.576 L6.583 6 11 10.424 10.424 11 6 6.583 1.576 11 1 10.424 5.417 6 1 1.576 1.576 1 6 5.417 10.424 1Z"
-            />
-          </svg>
+          <oi i="window-close" />
         </div>
       </div>
     </div>
-    <TabButtons class="titlebar__tabs" />
+    <!-- <TabButtons class="titlebar__tabs" /> -->
   </div>
 </template>
 
 <script lang="ts">
+import { useUserState } from '@/renderer/store'
 import { isBrowser } from '@/renderer/utils/browser'
 import { defineComponent, onMounted, ref } from '@vue/runtime-core'
 import { useI18n } from 'vue-i18n'
-// import saveIcon from '../assets/icons/save.svg'
-import TabButtons from './TabButtons.vue'
+// import TabButtons from './TabButtons.vue'
+import UserAvatar from '../account/UserAvatar.vue'
+import UserMenu from '../account/UserMenu.vue'
+import Popper from '../popper/Popper.vue'
 
 declare var global: {
   electron: any
@@ -95,13 +85,18 @@ declare var global: {
 
 export default defineComponent({
   components: {
-    TabButtons
+    // TabButtons
+    UserAvatar,
+    UserMenu,
+    Popper
   },
 
   setup (props) {
     const { t } = useI18n()
 
     const isMaximized = ref(false)
+
+    const userState = useUserState()
 
     onMounted(() => {
       if (isBrowser) return
@@ -128,7 +123,7 @@ export default defineComponent({
       close,
       toggleMaximize,
       minimize,
-      // saveIcon,
+      userState,
       isBrowser
     }
   }
@@ -164,24 +159,33 @@ export default defineComponent({
     -webkit-app-region: drag;
   }
 
-  &__tabs {
-    flex: 1 1 0;
-    position: relative;
-  }
-  &__search {
-    width: 250px;
-    align-self: center;
-    -webkit-app-region: no-drag;
-
-    .isBrowser & {
-      margin-right: 10px;
-    }
-  }
-
-  &__controls {
+  &__content {
     position: relative;
     display: flex;
     color: r.$col-200;
+  }
+
+  &__avatar {
+    height: 100%;
+    padding: 0 5px;
+  }
+  &__search {
+    margin: 0 6px;
+    width: 300px;
+  }
+
+  &__controls {
+    display: flex;
+    align-items: center;
+    padding-right: 10px;
+
+    .popper-target {
+      height: 100%;
+    }
+
+    & > * {
+      -webkit-app-region: no-drag;
+    }
   }
 
   &__window-controls {
@@ -195,7 +199,7 @@ export default defineComponent({
     justify-content: center;
     align-items: center;
 
-    font-size: 1.5rem;
+    font-size: 1rem;
 
     width: 50px;
     background: r.$col-900;
@@ -221,12 +225,6 @@ export default defineComponent({
           background: color.adjust(r.$col-danger, $lightness: 5%);
         }
       }
-    }
-
-    &__divider {
-      width: 1px;
-      margin: 10px;
-      background: r.$col-500;
     }
   }
 }

@@ -1,8 +1,4 @@
 <template>
-  <div
-    id="layer"
-    class="app-layer"
-  />
   <div class="app-layout">
     <Titlebar class="app-layout__titlebar" />
     <!-- <AppMenu class="app-layout__app-menu" /> -->
@@ -10,6 +6,10 @@
       <slot />
     </div>
   </div>
+  <div
+    id="layer"
+    class="app-layer"
+  />
 
   <!-- <transition name="fade">
     <div

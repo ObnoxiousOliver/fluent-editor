@@ -99,6 +99,9 @@ export default defineComponent({
   }
 
   &__before, &__after {
+    display: grid;
+    place-items: center;
+
     @include r.light {
       color: r.$col-400;
     }

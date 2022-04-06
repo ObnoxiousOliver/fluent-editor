@@ -92,6 +92,8 @@ export default defineComponent({
     onMounted(() => {
       // Update User Login Status
       onAuthStateChanged(getAuth(), (user) => {
+        userState.user = user
+        userState.displayName = user?.displayName ?? ''
         userState.isLoggedIn = !!user
       })
     })
