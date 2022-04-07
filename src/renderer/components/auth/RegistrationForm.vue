@@ -78,7 +78,7 @@
 </template>
 
 <script lang="ts">
-import { createUserWithEmailAndPassword, getAuth, onAuthStateChanged, updateProfile } from '@firebase/auth'
+import { createUserWithEmailAndPassword, getAuth, onAuthStateChanged, sendEmailVerification, updateProfile } from '@firebase/auth'
 import { defineComponent, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
@@ -119,16 +119,22 @@ export default defineComponent({
       suspend.value = true
 
       createUserWithEmailAndPassword(getAuth(), email.value, password.value)
-        .then((userCredentials) => {
+        .then(async (userCredentials) => {
           console.log('%c[Authentication]', 'color: #e846fa', 'Signed in as:', userCredentials.user.email)
 
-          updateProfile(userCredentials.user, {
-            displayName: displayName.value.trim()
-          }).then(() => {
+          try {
+            await updateProfile(userCredentials.user, { displayName: displayName.value.trim() })
             console.log('%c[Authentication]', 'color: #e846fa', 'Updated profile:', userCredentials.user.displayName)
-          }).catch((error) => {
+          } catch (error) {
             console.error('%c[Authentication]', 'color: #e846fa', 'Failed to update profile:', error)
-          })
+          }
+
+          try {
+            await sendEmailVerification(userCredentials.user)
+            console.log('%c[Authentication]', 'color: #e846fa', 'Sent email verification')
+          } catch (error) {
+            console.error('%c[Authentication]', 'color: #e846fa', 'Failed to send email verification:', error)
+          }
 
           // Redirect to the home page
           router.push(route.query.redirect as string || { name: 'home' })
