@@ -26,7 +26,7 @@ import { config } from '../utils/config'
 import { extendTool } from '../models/editor/tools/Tool'
 import { SelectionTool } from '../tools/selection/selection'
 import { TextBoxTool } from '../tools/textbox/textbox'
-import { getAuth, onAuthStateChanged } from '@firebase/auth'
+import { getAuth, onAuthStateChanged, User } from '@firebase/auth'
 // import HomeView from './HomeView.vue'
 // import Editor from './editor/EditorView.vue'
 
@@ -90,12 +90,16 @@ export default defineComponent({
     const userState = useUserState()
 
     onMounted(() => {
-      // Update User Login Status
+      // Listen for auth state changes
       onAuthStateChanged(getAuth(), (user) => {
+        updateUser(user)
+      })
+
+      function updateUser (user: User | null) {
         userState.user = user
         userState.displayName = user?.displayName ?? ''
         userState.isLoggedIn = !!user
-      })
+      }
     })
 
     return {

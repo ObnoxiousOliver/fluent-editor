@@ -31,7 +31,7 @@ const routes: RouteRecordRaw[] = [
   // 404 Page Not Found
   {
     path: '/:catchAll(.*)',
-    component: import(/* webpackChunkName: 'pageNotFound' */ '../views/PageNotFound.vue'),
+    component: () => import(/* webpackChunkName: 'pageNotFound' */ '../views/PageNotFound.vue'),
     meta: {
       title: 'view.pageNotFound',
       requiresAuth: false

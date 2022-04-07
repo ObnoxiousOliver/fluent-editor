@@ -1,7 +1,7 @@
 <template>
   <button class="user-avatar">
     <div class="user-avatar__circle">
-      {{ firstLetter(user?.displayName) }}
+      {{ firstLetter(user?.displayName ?? user?.email ?? '') }}
     </div>
   </button>
 </template>
