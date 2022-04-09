@@ -39,5 +39,23 @@ export default {
   input: {
     auto: 'auto',
     mixed: 'mixed'
+  },
+  auth: {
+    email: 'E-mail',
+    password: 'Password',
+    login: {
+      title: 'Sign in',
+      header: 'Welcome back',
+      registerLinkText: 'Don\'t have an account yet?',
+      registerLink: 'Sign up for free',
+      forgotPassword: 'Forgot my password'
+    },
+    register: {
+      title: 'Create new account',
+      header: 'Nice to meet you',
+      loginLinkText: 'Already have an account?',
+      loginLink: 'Sign in',
+      forgotPassword: 'Forgot my password'
+    }
   }
 }
