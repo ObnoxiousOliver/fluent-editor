@@ -1,6 +1,6 @@
 <template>
   <form
-    v-if="!suspend"
+    v-show="!suspend"
     @submit.prevent="register"
     class="login-form"
   >
@@ -78,7 +78,7 @@
 </template>
 
 <script lang="ts">
-import { createUserWithEmailAndPassword, getAuth, onAuthStateChanged, updateProfile } from '@firebase/auth'
+import { createUserWithEmailAndPassword, getAuth, onAuthStateChanged, reload, sendEmailVerification, updateProfile } from '@firebase/auth'
 import { defineComponent, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
@@ -97,9 +97,9 @@ export default defineComponent({
 
     onMounted(() => {
       // Listen for auth state changes
-      onAuthStateChanged(getAuth(), async (user) => {
+      onAuthStateChanged(getAuth(), (user) => {
         if (user) {
-          await router.push(route.query.redirect as string || { name: 'home' })
+          router.push(route.query.redirect as string || { name: 'home' })
         }
         suspend.value = false
       })
@@ -122,16 +122,35 @@ export default defineComponent({
         .then((userCredentials) => {
           console.log('%c[Authentication]', 'color: #e846fa', 'Signed in as:', userCredentials.user.email)
 
-          updateProfile(userCredentials.user, {
-            displayName: displayName.value.trim()
-          }).then(() => {
-            console.log('%c[Authentication]', 'color: #e846fa', 'Updated profile:', userCredentials.user.displayName)
-          }).catch((error) => {
-            console.error('%c[Authentication]', 'color: #e846fa', 'Failed to update profile:', error)
-          })
+          // Set Display Name
+          updateProfile(userCredentials.user, { displayName: displayName.value.trim() })
+            .then(() => {
+              console.log('%c[Authentication]', 'color: #e846fa', 'Updated user profile:', userCredentials.user.displayName)
+            })
+            .catch((error) => {
+              console.error('%c[Authentication]', 'color: #e846fa', 'Failed to update user profile:', error)
+            })
+            .finally(() => {
+              // Send email verification
+              sendEmailVerification(userCredentials.user)
+                .then(() => {
+                  console.log('%c[Authentication]', 'color: #e846fa', 'Sent email verification')
+                }).catch((error) => {
+                  console.error('%c[Authentication]', 'color: #e846fa', 'Failed to send email verification:', error)
+                }).finally(() => {
+                  suspend.value = false
 
-          // Redirect to the home page
-          router.push(route.query.redirect as string || { name: 'home' })
+                  // Reload the page to update the UI
+                  reload(userCredentials.user).then(() => {
+                    console.log('%c[Authentication]', 'color: #e846fa', 'Reloaded user data')
+                  }).catch((error) => {
+                    console.error('%c[Authentication]', 'color: #e846fa', 'Failed to reload user data:', error)
+                  }).finally(() => {
+                    // Redirect to the home page
+                    router.push(route.query.redirect as string || { name: 'home' })
+                  })
+                })
+            })
         }).catch((err) => {
           switch (err.code) {
             case 'auth/invalid-email':

@@ -1,23 +1,23 @@
 <template>
   <button class="user-avatar">
     <div class="user-avatar__circle">
-      {{ firstLetter(user?.displayName ?? user?.email ?? '') }}
+      {{ firstLetter }}
     </div>
   </button>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { computed, defineComponent } from 'vue'
 
 export default defineComponent({
   props: {
     user: Object
   },
 
-  setup () {
-    const firstLetter = (name: string) => {
-      return name.charAt(0).toUpperCase()
-    }
+  setup (props) {
+    const firstLetter = computed(() => {
+      return (props.user?.displayName ?? props.user?.email ?? '').charAt(0).toUpperCase()
+    })
 
     return {
       firstLetter

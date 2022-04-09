@@ -28,9 +28,7 @@
             :user="userState.user"
           />
           <template #content>
-            <UserMenu
-              :user="userState.user"
-            />
+            <UserMenu />
           </template>
         </Popper>
       </div>

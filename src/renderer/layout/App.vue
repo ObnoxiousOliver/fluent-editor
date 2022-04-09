@@ -19,14 +19,18 @@ import { defineComponent, onBeforeUnmount, onMounted } from '@vue/runtime-core'
 
 import keybindManager from '../utils/keybindManager'
 import setupActions from '../utils/setupActions'
-
-import { useActions, useEditor, useRuntime, useUserState } from '../store'
-import AppLayout from './AppLayout.vue'
 import { config } from '../utils/config'
 import { extendTool } from '../models/editor/tools/Tool'
+
 import { SelectionTool } from '../tools/selection/selection'
 import { TextBoxTool } from '../tools/textbox/textbox'
-import { getAuth, onAuthStateChanged, User } from '@firebase/auth'
+
+import { useActions, useEditor, useRuntime, useUserState } from '../store'
+
+import { useRouter } from 'vue-router'
+import { getAuth, onAuthStateChanged, reload, User } from '@firebase/auth'
+
+import AppLayout from './AppLayout.vue'
 // import HomeView from './HomeView.vue'
 // import Editor from './editor/EditorView.vue'
 
@@ -41,7 +45,10 @@ export default defineComponent({
     const runtime = useRuntime()
     const actions = useActions()
 
+    const router = useRouter()
+
     // Sync document store with local storage
+    // TODO: Remove in production
     try {
       editorStore.$patch(JSON.parse(localStorage.getItem('editorState') ?? ''))
       editorStore.tabs.forEach(x => runtime.addTab(x.id))
@@ -61,6 +68,7 @@ export default defineComponent({
     })
 
     // Handel Color Theme
+    // TODO: Move to a plugin
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateTheme)
     config.watch('theme', updateTheme)
 
@@ -83,23 +91,59 @@ export default defineComponent({
     }
 
     // Handle Tools
+    // TODO: Move to a plugin
     extendTool(SelectionTool)
     extendTool(TextBoxTool)
 
-    // Handle Authorisation
+    // Handle Auth
     const userState = useUserState()
 
     onMounted(() => {
+      var reloadIntervalId: number | undefined
+
       // Listen for auth state changes
-      onAuthStateChanged(getAuth(), (user) => {
+      var unsubscribe = onAuthStateChanged(getAuth(), (user) => {
         updateUser(user)
+        if (user) {
+          if (reloadIntervalId) {
+            clearInterval(reloadIntervalId)
+          }
+
+          // Create reload interval
+          reloadIntervalId = setInterval(() => {
+            // Reload user data
+            reload(user).then(() => {
+              // Update user state
+              updateUser(getAuth().currentUser)
+
+              console.log('%c[Authentication]', 'color: #e846fa', 'Reloaded user data')
+            }).catch((error) => {
+              console.error('%c[Authentialication]', 'color: #e846fa', error)
+            })
+          }, 30 * 1000)
+        } else {
+          // Clear Reload Interval
+          clearInterval(reloadIntervalId)
+          reloadIntervalId = undefined
+
+          // Redirect to login
+          router.push('/auth/login')
+        }
       })
 
+      // Update user state store
       function updateUser (user: User | null) {
         userState.user = user
+        userState.emailVerified = user?.emailVerified ?? false
         userState.displayName = user?.displayName ?? ''
         userState.isLoggedIn = !!user
       }
+
+      // Unsubscribe from auth state changes
+      onBeforeUnmount(() => {
+        clearInterval(reloadIntervalId)
+        unsubscribe()
+      })
     })
 
     return {
