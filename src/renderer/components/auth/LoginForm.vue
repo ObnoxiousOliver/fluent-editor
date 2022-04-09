@@ -1,6 +1,6 @@
 <template>
   <form
-    v-if="!suspend"
+    v-show="!suspend"
     @submit.prevent="signIn"
     class="login-form"
   >
@@ -66,9 +66,9 @@ export default defineComponent({
 
     onMounted(() => {
       // Listen for auth state changes
-      onAuthStateChanged(getAuth(), async (user) => {
+      onAuthStateChanged(getAuth(), (user) => {
         if (user) {
-          await router.push(route.query.redirect as string ?? { name: 'home' })
+          router.push(route.query.redirect as string ?? { name: 'home' })
         }
         suspend.value = false
       })
