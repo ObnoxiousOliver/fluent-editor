@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import Action from '@/renderer/models/actions/Action'
+import debug, { Log } from '../utils/debug'
 
 export const useActions = defineStore('actions', {
   state: () => ({
@@ -13,13 +14,13 @@ export const useActions = defineStore('actions', {
     },
     execute (id: string, ...args: any[]) {
       if (this.registeredActions[id]) {
-        console.log('%c[Actions]', 'color: #f34;', 'Executing: ' + id)
+        debug.log(Log.actions, 'Executing: ' + id)
 
         if (this.registeredActions[id].hooks) {
           this.registeredActions[id].hooks!.forEach(x => x(...args))
         }
       } else {
-        console.log('%c[Actions]', 'color: #f34;', 'Error: No action with id ' + id)
+        debug.error(Log.actions, 'Error: No action with id ' + id)
       }
     },
     hook (id: string, ...hooks: Function[]) {
@@ -28,7 +29,7 @@ export const useActions = defineStore('actions', {
 
         this.registeredActions[id].hooks!.push(...hooks)
       } else {
-        console.log('%c[Actions]', 'color: #f34;', 'Error: No action with id ' + id)
+        debug.error(Log.actions, 'Error: No action with id ' + id)
       }
     },
     unhook (id: string, ...hooks: Function[]) {
@@ -40,7 +41,7 @@ export const useActions = defineStore('actions', {
           })
         }
       } else {
-        console.log('%c[Actions]', 'color: #f34;', 'Error: No action with id ' + id)
+        debug.error(Log.actions, 'Error: No action with id ' + id)
       }
     }
   },

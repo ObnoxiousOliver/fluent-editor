@@ -78,6 +78,7 @@
 </template>
 
 <script lang="ts">
+import { errorEmailAlreadyInUse, errorInvalidEmail, errorReload, errorSendEmailVerification, errorUnknown, errorUpdateProfile, errorWeakPassword, logReload, logSendEmailVerification, logSignInAs, logUpdateProfile } from '@/renderer/firebase/logging'
 import { createUserWithEmailAndPassword, getAuth, onAuthStateChanged, reload, sendEmailVerification, updateProfile } from '@firebase/auth'
 import { defineComponent, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -120,31 +121,31 @@ export default defineComponent({
 
       createUserWithEmailAndPassword(getAuth(), email.value, password.value)
         .then((userCredentials) => {
-          console.log('%c[Authentication]', 'color: #e846fa', 'Signed in as:', userCredentials.user.email)
+          logSignInAs(userCredentials.user.email)
 
           // Set Display Name
           updateProfile(userCredentials.user, { displayName: displayName.value.trim() })
             .then(() => {
-              console.log('%c[Authentication]', 'color: #e846fa', 'Updated user profile:', userCredentials.user.displayName)
+              logUpdateProfile(userCredentials.user.displayName)
             })
-            .catch((error) => {
-              console.error('%c[Authentication]', 'color: #e846fa', 'Failed to update user profile:', error)
+            .catch((err) => {
+              errorUpdateProfile(err)
             })
             .finally(() => {
               // Send email verification
               sendEmailVerification(userCredentials.user)
                 .then(() => {
-                  console.log('%c[Authentication]', 'color: #e846fa', 'Sent email verification')
-                }).catch((error) => {
-                  console.error('%c[Authentication]', 'color: #e846fa', 'Failed to send email verification:', error)
+                  logSendEmailVerification(userCredentials.user.email)
+                }).catch((err) => {
+                  errorSendEmailVerification(err)
                 }).finally(() => {
                   suspend.value = false
 
                   // Reload the page to update the UI
                   reload(userCredentials.user).then(() => {
-                    console.log('%c[Authentication]', 'color: #e846fa', 'Reloaded user data')
-                  }).catch((error) => {
-                    console.error('%c[Authentication]', 'color: #e846fa', 'Failed to reload user data:', error)
+                    logReload()
+                  }).catch((err) => {
+                    errorReload(err)
                   }).finally(() => {
                     // Redirect to the home page
                     router.push(route.query.redirect as string || { name: 'home' })
@@ -154,19 +155,19 @@ export default defineComponent({
         }).catch((err) => {
           switch (err.code) {
             case 'auth/invalid-email':
-              console.error('%c[Authentication]', 'color: #e846fa', 'Invalid email')
+              errorInvalidEmail()
               break
 
             case 'auth/email-already-in-use':
-              console.error('%c[Authentication]', 'color: #e846fa', 'Email already exists')
+              errorEmailAlreadyInUse()
               break
 
             case 'auth/weak-password':
-              console.error('%c[Authentication]', 'color: #e846fa', 'Password is too weak')
+              errorWeakPassword()
               break
 
             default:
-              console.error('%c[Authentication]', 'color: #e846fa', 'Error:', err)
+              errorUnknown(err)
               break
           }
         }).finally(() => {

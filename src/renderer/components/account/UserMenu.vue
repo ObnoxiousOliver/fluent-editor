@@ -19,30 +19,33 @@
 import { useUserState } from '@/renderer/store'
 import { getAuth, reload, sendEmailVerification } from '@firebase/auth'
 import { defineComponent } from 'vue'
+import { errorSendEmailVerification, logEmailAlreadyVerified, logSendEmailVerification, logSignOut } from '@/renderer/firebase/logging'
 
 export default defineComponent({
   setup () {
     const userState = useUserState()
 
-    function signOut () {
-      getAuth().signOut()
+    const auth = getAuth()
 
-      console.log('%c[Authentication]', 'color: #e846fa', 'User signed out')
+    function signOut () {
+      auth.signOut()
+
+      logSignOut()
     }
 
     // Send email verification
     function verifyEmail () {
-      if (getAuth().currentUser) {
-        reload(getAuth().currentUser!).then(() => {
-          if (!getAuth().currentUser?.emailVerified) {
-            sendEmailVerification(getAuth().currentUser!)
+      if (auth.currentUser) {
+        reload(auth.currentUser!).then(() => {
+          if (!auth.currentUser?.emailVerified) {
+            sendEmailVerification(auth.currentUser!)
               .then(() => {
-                console.log('%c[Authentication]', 'color: #e846fa', 'Sent email verification')
-              }).catch((error) => {
-                console.error('%c[Authentication]', 'color: #e846fa', 'Failed to send email verification:', error)
+                logSendEmailVerification(auth.currentUser?.email!)
+              }).catch((err) => {
+                errorSendEmailVerification(err)
               })
           } else {
-            console.log('%c[Authentication]', 'color: #e846fa', 'Email is already verified')
+            logEmailAlreadyVerified()
           }
         })
       }

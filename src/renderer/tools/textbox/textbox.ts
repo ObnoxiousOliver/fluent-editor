@@ -67,7 +67,7 @@ export const TextBoxTool = defineTool({
         }
       }
     }).on('tap', (e) => {
-      console.log(e)
+      // console.log(e)
 
       const doc = clientToDoc({ editor, root, viewportWidth, viewportHeight }, e.pageX, e.pageY)
       const textBox = createTextNode(new Rect(

@@ -31,6 +31,7 @@ import { useRouter } from 'vue-router'
 import { getAuth, onAuthStateChanged, reload, User } from '@firebase/auth'
 
 import AppLayout from './AppLayout.vue'
+import { errorReload, logReload } from '../firebase/logging'
 // import HomeView from './HomeView.vue'
 // import Editor from './editor/EditorView.vue'
 
@@ -97,12 +98,13 @@ export default defineComponent({
 
     // Handle Auth
     const userState = useUserState()
+    const auth = getAuth()
 
     onMounted(() => {
       var reloadIntervalId: number | undefined
 
       // Listen for auth state changes
-      var unsubscribe = onAuthStateChanged(getAuth(), (user) => {
+      var unsubscribe = onAuthStateChanged(auth, (user) => {
         updateUser(user)
         if (user) {
           if (reloadIntervalId) {
@@ -114,11 +116,11 @@ export default defineComponent({
             // Reload user data
             reload(user).then(() => {
               // Update user state
-              updateUser(getAuth().currentUser)
+              updateUser(auth.currentUser)
 
-              console.log('%c[Authentication]', 'color: #e846fa', 'Reloaded user data')
-            }).catch((error) => {
-              console.error('%c[Authentialication]', 'color: #e846fa', error)
+              logReload()
+            }).catch((err) => {
+              errorReload(err)
             })
           }, 30 * 1000)
         } else {
