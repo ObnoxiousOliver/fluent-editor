@@ -16,6 +16,7 @@
 
 <script lang="ts">
 import { defineComponent, onBeforeUnmount, onMounted } from '@vue/runtime-core'
+import { useRouter } from 'vue-router'
 
 import keybindManager from '../utils/keybindManager'
 import setupActions from '../utils/setupActions'
@@ -25,13 +26,12 @@ import { extendTool } from '../models/editor/tools/Tool'
 import { SelectionTool } from '../tools/selection/selection'
 import { TextBoxTool } from '../tools/textbox/textbox'
 
-import { useActions, useEditor, useRuntime, useUserState } from '../store'
+import { useActions, useEditor, useRuntime } from '../store'
 
-import { useRouter } from 'vue-router'
-import { getAuth, onAuthStateChanged, reload, User } from '@firebase/auth'
+import { getAuth, onAuthStateChanged } from '@firebase/auth'
+import { reloadUser, updateUserState } from '../firebase/auth'
 
 import AppLayout from './AppLayout.vue'
-import { errorReload, logReload } from '../firebase/logging'
 // import HomeView from './HomeView.vue'
 // import Editor from './editor/EditorView.vue'
 
@@ -97,7 +97,6 @@ export default defineComponent({
     extendTool(TextBoxTool)
 
     // Handle Auth
-    const userState = useUserState()
     const auth = getAuth()
 
     onMounted(() => {
@@ -105,24 +104,14 @@ export default defineComponent({
 
       // Listen for auth state changes
       var unsubscribe = onAuthStateChanged(auth, (user) => {
-        updateUser(user)
+        updateUserState(user)
         if (user) {
           if (reloadIntervalId) {
             clearInterval(reloadIntervalId)
           }
 
           // Create reload interval
-          reloadIntervalId = setInterval(() => {
-            // Reload user data
-            reload(user).then(() => {
-              // Update user state
-              updateUser(auth.currentUser)
-
-              logReload()
-            }).catch((err) => {
-              errorReload(err)
-            })
-          }, 30 * 1000)
+          reloadIntervalId = setInterval(() => reloadUser(), 30 * 1000)
         } else {
           // Clear Reload Interval
           clearInterval(reloadIntervalId)
@@ -132,14 +121,6 @@ export default defineComponent({
           router.push('/auth/login')
         }
       })
-
-      // Update user state store
-      function updateUser (user: User | null) {
-        userState.user = user
-        userState.emailVerified = user?.emailVerified ?? false
-        userState.displayName = user?.displayName ?? ''
-        userState.isLoggedIn = !!user
-      }
 
       // Unsubscribe from auth state changes
       onBeforeUnmount(() => {

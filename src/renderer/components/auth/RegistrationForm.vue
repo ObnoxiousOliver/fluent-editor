@@ -78,8 +78,8 @@
 </template>
 
 <script lang="ts">
-import { errorEmailAlreadyInUse, errorInvalidEmail, errorReload, errorSendEmailVerification, errorUnknown, errorUpdateProfile, errorWeakPassword, logReload, logSendEmailVerification, logSignInAs, logUpdateProfile } from '@/renderer/firebase/logging'
-import { createUserWithEmailAndPassword, getAuth, onAuthStateChanged, reload, sendEmailVerification, updateProfile } from '@firebase/auth'
+import { getAuth, onAuthStateChanged } from '@firebase/auth'
+import { createAccountWithEmailPasswordAndName } from '@/renderer/firebase/auth'
 import { defineComponent, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
@@ -119,55 +119,22 @@ export default defineComponent({
 
       suspend.value = true
 
-      createUserWithEmailAndPassword(getAuth(), email.value, password.value)
-        .then((userCredentials) => {
-          logSignInAs(userCredentials.user.email)
-
-          // Set Display Name
-          updateProfile(userCredentials.user, { displayName: displayName.value.trim() })
-            .then(() => {
-              logUpdateProfile(userCredentials.user.displayName)
-            })
-            .catch((err) => {
-              errorUpdateProfile(err)
-            })
-            .finally(() => {
-              // Send email verification
-              sendEmailVerification(userCredentials.user)
-                .then(() => {
-                  logSendEmailVerification(userCredentials.user.email)
-                }).catch((err) => {
-                  errorSendEmailVerification(err)
-                }).finally(() => {
-                  suspend.value = false
-
-                  // Reload the page to update the UI
-                  reload(userCredentials.user).then(() => {
-                    logReload()
-                  }).catch((err) => {
-                    errorReload(err)
-                  }).finally(() => {
-                    // Redirect to the home page
-                    router.push(route.query.redirect as string || { name: 'home' })
-                  })
-                })
-            })
+      createAccountWithEmailPasswordAndName(email.value, password.value, displayName.value)
+        .then(() => {
+          // Redirect to the home page
+          router.push(route.query.redirect as string || { name: 'home' })
         }).catch((err) => {
           switch (err.code) {
             case 'auth/invalid-email':
-              errorInvalidEmail()
               break
 
             case 'auth/email-already-in-use':
-              errorEmailAlreadyInUse()
               break
 
             case 'auth/weak-password':
-              errorWeakPassword()
               break
 
             default:
-              errorUnknown(err)
               break
           }
         }).finally(() => {

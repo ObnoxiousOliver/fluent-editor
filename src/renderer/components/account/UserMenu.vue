@@ -17,9 +17,10 @@
 
 <script lang="ts">
 import { useUserState } from '@/renderer/store'
-import { getAuth, reload, sendEmailVerification } from '@firebase/auth'
+import { getAuth } from '@firebase/auth'
 import { defineComponent } from 'vue'
-import { errorSendEmailVerification, logEmailAlreadyVerified, logSendEmailVerification, logSignOut } from '@/renderer/firebase/logging'
+import { logEmailAlreadyVerified, logSignOut } from '@/renderer/firebase/logging'
+import { reloadUser, sendEmailVerification } from '@/renderer/firebase/auth'
 
 export default defineComponent({
   setup () {
@@ -36,14 +37,9 @@ export default defineComponent({
     // Send email verification
     function verifyEmail () {
       if (auth.currentUser) {
-        reload(auth.currentUser!).then(() => {
+        reloadUser().then(() => {
           if (!auth.currentUser?.emailVerified) {
-            sendEmailVerification(auth.currentUser!)
-              .then(() => {
-                logSendEmailVerification(auth.currentUser?.email!)
-              }).catch((err) => {
-                errorSendEmailVerification(err)
-              })
+            sendEmailVerification()
           } else {
             logEmailAlreadyVerified()
           }
