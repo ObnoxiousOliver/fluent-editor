@@ -53,6 +53,8 @@ import { getAuth, onAuthStateChanged, signInWithEmailAndPassword } from '@fireba
 import { defineComponent, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
+import { errorInvalidEmail, errorUnknown, errorUserNotFound, errorWrongPassword, logSignInAs } from '@/renderer/firebase/logging'
+
 export default defineComponent({
   setup () {
     const email = ref('')
@@ -80,26 +82,26 @@ export default defineComponent({
 
       signInWithEmailAndPassword(getAuth(), email.value, password.value)
         .then((userCredentials) => {
-          console.log('%c[Authentication]', 'color: #e846fa', 'Signed in as:', userCredentials.user.email)
+          logSignInAs(userCredentials.user.email)
 
           // Redirect to the home page
           router.push(route.query.redirect as string || { name: 'home' })
         }).catch((err) => {
           switch (err.code) {
             case 'auth/user-not-found':
-              console.error('%c[Authentication]', 'color: #e846fa', 'User not found')
+              errorUserNotFound()
               break
 
             case 'auth/wrong-password':
-              console.error('%c[Authentication]', 'color: #e846fa', 'Wrong password')
+              errorWrongPassword()
               break
 
             case 'auth/invalid-email':
-              console.error('%c[Authentication]', 'color: #e846fa', 'Invalid email')
+              errorInvalidEmail()
               break
 
             default:
-              console.error('%c[Authentication]', 'color: #e846fa', 'Error:', err)
+              errorUnknown(err)
               break
           }
         }).finally(() => {

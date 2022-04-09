@@ -30,9 +30,9 @@ export default {
         return
       }
 
-      if (keys.length) {
-        console.log('%c[Pressed Keys]', 'color: #3ef;', keys.map(x => keycode(x)).join(', '))
-      }
+      // if (keys.length) {
+      //   console.log('%c[Pressed Keys]', 'color: #3ef;', keys.map(x => keycode(x)).join(', '))
+      // }
 
       if (actionStore.getKeyboardShortcuts
         .filter(x => keys?.every((key: any) => x.shortcut.map(x => keycode(x)).includes(key))).length === 1 ||
