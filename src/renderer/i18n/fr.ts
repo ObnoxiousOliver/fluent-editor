@@ -46,5 +46,25 @@ export default {
   input: {
     auto: 'auto',
     mixed: 'mixte'
+  },
+  auth: {
+    email: 'E-Mail',
+    password: 'Mot de passe',
+    login: {
+      title: 'Connexion',
+      header: 'Content de te revoir',
+      registerLinkText: 'Pas encore de compte?',
+      registerLink: 'Enregistrer gratuitement',
+      forgotPassword: 'Mot de passe oublié?'
+    },
+    register: {
+      title: 'Créer un nouveau compte',
+      header: 'Ravi de te rencontrer',
+      loginLinkText: 'Déjà un compte?',
+      loginLink: 'Connexion',
+      emailInUse: 'E-Mail déjà utilisé',
+      invalidEmail: 'E-Mail invalide',
+      passwordMismatch: 'Les mots de passe ne correspondent pas'
+    }
   }
 }

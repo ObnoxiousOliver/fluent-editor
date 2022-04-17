@@ -1,78 +1,61 @@
 <template>
   <form
-    v-show="!suspend"
     @submit.prevent="register"
-    class="login-form"
+    class="form"
   >
-    <router-link :to="{ params: { action: 'login' } }">
-      Login
-    </router-link>
+    <div class="form__text">
+      {{ $t('auth.register.loginLinkText') }}
 
-    <div class="login-form__input-group">
-      <label
-        class="login-form__label"
-        for="displayName"
+      <router-link
+        class="form__link"
+        :to="{ params: { action: 'login' } }"
       >
-        Display Name
-      </label>
-      <input
-        id="displayName"
-        type="text"
-        class="login-form__input"
-        v-model="displayName"
-      >
+        {{ $t('auth.register.loginLink') }}
+      </router-link>
     </div>
-    <div class="login-form__input-group">
-      <label
-        class="login-form__label"
-        for="email"
-      >
-        Email
-      </label>
-      <input
-        id="email"
-        type="email"
-        class="login-form__input"
-        v-model="email"
-      >
-    </div>
-    <div class="login-form__input-group">
-      <label
-        class="login-form__label"
-        for="password"
-      >
-        Password
-      </label>
-      <input
-        id="password"
-        type="password"
-        class="login-form__input"
-        autocomplete="on"
-        v-model="password"
-      >
-    </div>
-    <div class="login-form__input-group">
-      <label
-        class="login-form__label"
-        for="confirmPassword"
-      >
-        Confirm Password
-      </label>
-      <input
-        id="confirmPassword"
-        type="password"
-        class="login-form__input"
-        autocomplete="on"
-        v-model="confirmPassword"
-      >
-    </div>
-    <div class="login-form__input-group">
-      <button
-        class="login-form__button"
-        type="submit"
-      >
-        Create
-      </button>
+
+    <div class="form__inputs">
+      <fieldset :disabled="suspend">
+        <div class="form__input-group form__input-group--display-name">
+          <FloatingLabelField
+            v-model="displayName"
+            :label="$t('auth.displayName')"
+            type="text"
+          />
+        </div>
+        <div class="form__input-group form__input-group--email">
+          <FloatingLabelField
+            v-model="email"
+            :label="$t('auth.email')"
+            type="email"
+          />
+        </div>
+        <div class="form__input-group form__input-group--password">
+          <FloatingLabelField
+            v-model="password"
+            :label="$t('auth.password')"
+            type="password"
+            autocomplete="on"
+          />
+          <FloatingLabelField
+            v-model="confirmPassword"
+            :label="$t('auth.register.confirmPassword')"
+            type="password"
+            autocomplete="on"
+          />
+        </div>
+
+        <div class="form__input-group form__input-group--submit">
+          <SubmitButton>
+            {{ $t('auth.register.button') }}
+          </SubmitButton>
+        </div>
+      </fieldset>
+
+      <LoadingSpinner
+        class="form__spinner"
+        v-if="suspend"
+      />
     </div>
   </form>
 </template>
@@ -82,8 +65,11 @@ import { getAuth, onAuthStateChanged } from '@firebase/auth'
 import { createAccountWithEmailPasswordAndName } from '@/renderer/firebase/auth'
 import { defineComponent, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import FloatingLabelField from '../FloatingLabelField.vue'
+import SubmitButton from './SubmitButton.vue'
 
 export default defineComponent({
+  components: { FloatingLabelField, SubmitButton },
   setup () {
     const displayName = ref('')
     const email = ref('')
@@ -154,3 +140,21 @@ export default defineComponent({
   }
 })
 </script>
+
+<style lang="scss" scoped>
+@use '../../scss/form';
+
+.form {
+  &__inputs fieldset {
+    gap: 20px;
+  }
+
+  &__input-group {
+    &--password {
+      .floating-label-field:first-child {
+        margin-bottom: 10px;
+      }
+    }
+  }
+}
+</style>

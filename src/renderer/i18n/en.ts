@@ -22,20 +22,6 @@ export default {
     untitled: 'Untitled {0}',
     slide: 'Slide {0}'
   },
-  properties: {
-    layout: {
-      name: 'Layout',
-      x: 'X',
-      y: 'Y',
-      w: 'W',
-      h: 'H'
-    },
-    transform: {
-      name: 'Transform',
-      translate: 'Translate',
-      scale: 'Scale'
-    }
-  },
   input: {
     auto: 'auto',
     mixed: 'mixed'
@@ -43,19 +29,25 @@ export default {
   auth: {
     email: 'E-mail',
     password: 'Password',
+    displayName: 'Display name',
     login: {
       title: 'Sign in',
       header: 'Welcome back',
       registerLinkText: 'Don\'t have an account yet?',
       registerLink: 'Sign up for free',
-      forgotPassword: 'Forgot my password'
+      forgotPassword: 'Forgot my password',
+      button: 'Sign in!'
     },
     register: {
       title: 'Create new account',
       header: 'Nice to meet you',
+      confirmPassword: 'Confirm password',
       loginLinkText: 'Already have an account?',
       loginLink: 'Sign in',
-      forgotPassword: 'Forgot my password'
+      emailInUse: 'E-mail is already in use',
+      invalidEmail: 'E-mail is invalid',
+      passwordMismatch: 'Passwords do not match',
+      button: 'Create!'
     }
   }
 }

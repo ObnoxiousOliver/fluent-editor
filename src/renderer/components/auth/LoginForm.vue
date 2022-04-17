@@ -1,49 +1,55 @@
 <template>
   <form
-    v-show="!suspend"
     @submit.prevent="signIn"
-    class="login-form"
+    class="form"
   >
-    <router-link :to="{ params: { action: 'register' } }">
-      Register
-    </router-link>
+    <div class="form__text">
+      {{ $t('auth.login.registerLinkText') }}
 
-    <div class="login-form__input-group">
-      <label
-        class="login-form__label"
-        for="email"
+      <router-link
+        class="form__link"
+        :to="{ params: { action: 'register' } }"
       >
-        Email
-      </label>
-      <input
-        id="email"
-        type="email"
-        class="login-form__input"
-        v-model="email"
-      >
+        {{ $t('auth.login.registerLink') }}
+      </router-link>
     </div>
-    <div class="login-form__input-group">
-      <label
-        class="login-form__label"
-        for="password"
-      >
-        Password
-      </label>
-      <input
-        id="password"
-        type="password"
-        class="login-form__input"
-        autocomplete="on"
-        v-model="password"
-      >
-    </div>
-    <div class="login-form__input-group">
-      <button
-        class="login-form__button"
-        type="submit"
-      >
-        Login
-      </button>
+
+    <div class="form__inputs">
+      <fieldset :disabled="suspend">
+        <div class="form__input-group">
+          <FloatingLabelField
+            v-model="email"
+            :label="$t('auth.email')"
+            type="email"
+          />
+        </div>
+
+        <div class="form__input-group form__input-group--password">
+          <FloatingLabelField
+            v-model="password"
+            :label="$t('auth.password')"
+            type="password"
+            autocomplete="on"
+          />
+          <router-link
+            class="form__forgot-password-link"
+            to="#"
+          >
+            {{ $t('auth.login.forgotPassword') }}
+          </router-link>
+        </div>
+
+        <div class="form__input-group form__input-group--submit">
+          <SubmitButton>
+            {{ $t('auth.login.button') }}
+          </SubmitButton>
+        </div>
+      </fieldset>
+
+      <LoadingSpinner
+        class="form__spinner"
+        v-if="suspend"
+      />
     </div>
   </form>
 </template>
@@ -54,8 +60,12 @@ import { defineComponent, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import { errorInvalidEmail, errorUnknown, errorUserNotFound, errorWrongPassword, logSignInAs } from '@/renderer/firebase/logging'
+import FloatingLabelField from '../FloatingLabelField.vue'
+import SubmitButton from './SubmitButton.vue'
+import LoadingSpinner from '../LoadingSpinner.vue'
 
 export default defineComponent({
+  components: { FloatingLabelField, SubmitButton, LoadingSpinner },
   setup () {
     const email = ref('')
     const password = ref('')
@@ -119,3 +129,17 @@ export default defineComponent({
   }
 })
 </script>
+
+<style lang="scss" scoped>
+@use '../../scss/form';
+
+.form {
+  &__input-group {
+    &--password {
+      .floating-label-field {
+        margin-bottom: 20px;
+      }
+    }
+  }
+}
+</style>

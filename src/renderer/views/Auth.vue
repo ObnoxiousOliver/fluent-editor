@@ -5,41 +5,57 @@
       'view-auth--page-register': !isLogin
     }]"
   >
-    <h2 class="view-auth__subheading">
-      <span class="view-auth__subheading__login">
-        {{ $t('auth.login.title') }}
-      </span>
-      <span class="view-auth__subheading__register">
-        {{ $t('auth.register.title') }}
-      </span>
-    </h2>
-    <h1 class="view-auth__heading">
-      <span
-        :style="{
-          '--width': contentWidth + 'px'
-        }"
-        class="view-auth__heading__content"
-      >
+    <div class="view-auth__form">
+      <div class="view-auth__form__box" />
+      <div class="view-auth__form__content">
+        <h2 class="view-auth__subheading">
+          <span class="view-auth__subheading__login">
+            {{ $t('auth.login.title') }}
+          </span>
+          <span class="view-auth__subheading__register">
+            {{ $t('auth.register.title') }}
+          </span>
+        </h2>
+        <h1 class="view-auth__heading">
+          <span
+            :style="{
+              '--width': contentWidth + 'px'
+            }"
+            class="view-auth__heading__content"
+          >
 
-        <span
-          ref="headingLogin"
-          class="view-auth__heading__login"
+            <span
+              ref="headingLogin"
+              class="view-auth__heading__login"
+            >
+              {{ $t('auth.login.header') }}
+            </span>
+            <span
+              ref="headingRegister"
+              class="view-auth__heading__register"
+            >
+              {{ $t('auth.register.header') }}
+            </span>
+
+          </span>
+          <span class="view-auth__heading__period">.</span>
+        </h1>
+
+        <transition
+          name="view-auth__page"
+          mode="out-in"
         >
-          {{ $t('auth.login.header') }}
-        </span>
-        <span
-          ref="headingRegister"
-          class="view-auth__heading__register"
-        >
-          {{ $t('auth.register.header') }}
-        </span>
-
-      </span>
-      <span class="view-auth__heading__period">.</span>
-    </h1>
-
-    <LoginForm v-if="isLogin" />
-    <RegistrationForm v-else />
+          <LoginForm
+            class="view-auth__page view-auth__page--login"
+            v-if="isLogin"
+          />
+          <RegistrationForm
+            class="view-auth__page view-auth__page--register"
+            v-else
+          />
+        </transition>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -76,6 +92,50 @@ export default defineComponent({
 @use '../scss' as r;
 
 .view-auth {
+  height: 100%;
+
+  @include r.light {
+    background: r.$col-white;
+  }
+  @include r.dark {
+    background: r.$col-900;
+  }
+
+  &__form {
+    position: absolute;
+    inset: 50% auto auto 10%;
+    width: 390px;
+    height: 550px;
+
+    transform: translateY(-50%);
+
+    &__box {
+      position: absolute;
+      inset: 0 10px 0 0;
+      transform: translate(-20px, 20px);
+
+      @include r.light {
+        border: r.$col-100 solid 2px;
+      }
+      @include r.dark {
+        border: r.$col-600 solid 2px;
+      }
+      border-radius: 20px;
+    }
+
+    &__content {
+      position: relative;
+      padding: 10px;
+
+      @include r.light {
+        background: r.$col-white;
+      }
+      @include r.dark {
+        background: r.$col-900;
+      }
+    }
+  }
+
   &__subheading {
     position: relative;
     height: 20px;
@@ -115,11 +175,15 @@ export default defineComponent({
     font-weight: 900;
     font-size: 45px;
     white-space: nowrap;
+    display: flex;
+    flex-flow: row nowrap;
+    width: fit-content;
 
     line-height: 1;
 
     &__content {
       display: inline-block;
+      flex: 0 0 auto;
       position: relative;
       height: 45px;
       width: var(--width);
@@ -147,6 +211,35 @@ export default defineComponent({
 
     &__period {
       color: r.$col-primary;
+    }
+  }
+
+  &__page {
+    &-enter-active {
+      transition: .1s cubic-bezier(0.215, 0.610, 0.355, 1);
+    }
+    &-leave-active {
+      transition: .1s cubic-bezier(0.55, 0.055, 0.675, 0.19);
+    }
+
+    &-enter-from, &-leave-to {
+      opacity: 0;
+    }
+
+    &--login {
+      &.view-auth__page {
+        &-enter-from, &-leave-to {
+          transform: translateX(-20px);
+        }
+      }
+    }
+
+    &--register {
+      &.view-auth__page {
+        &-enter-from, &-leave-to {
+          transform: translateX(20px);
+        }
+      }
     }
   }
 }

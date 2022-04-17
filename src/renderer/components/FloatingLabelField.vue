@@ -16,6 +16,7 @@
       :aria-label="label"
       v-model="value"
       v-bind="$attrs"
+      :autocomplete="autocomplete"
     >
   </div>
 </template>
@@ -31,7 +32,8 @@ export default defineComponent({
   props: {
     label: String,
     type: { type: String, default: 'text' },
-    modelValue: String
+    modelValue: String,
+    autocomplete: String
   },
 
   setup (props, { emit }) {
