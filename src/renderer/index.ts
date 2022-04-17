@@ -67,5 +67,11 @@ if (isBrowser) {
   document.documentElement.classList.add('isBrowser')
 }
 
+// devtools
+(window as any).config = {
+  set: config.set,
+  get: config.get
+}
+
 // Prevent Zooming
 document.querySelector('#app')!.addEventListener('wheel', (e: any) => e.ctrlKey && e.preventDefault())
