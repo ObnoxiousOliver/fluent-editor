@@ -4,6 +4,7 @@ export enum Log {
   app,
   auth,
   actions,
+  firestore
 }
 
 export const logTypesValue: { [x: number]: LogType} = {
@@ -18,6 +19,10 @@ export const logTypesValue: { [x: number]: LogType} = {
   [Log.actions]: {
     name: 'Actions',
     color: '#ff9800'
+  },
+  [Log.firestore]: {
+    name: 'Firestore',
+    color: '#ff5722'
   }
 }
 

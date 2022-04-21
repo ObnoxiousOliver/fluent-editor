@@ -20,6 +20,7 @@ import {
   logSignInAs,
   logUpdateProfile
 } from './logging'
+import { setCreationDate } from './firestore'
 
 const auth = getAuth()
 
@@ -67,6 +68,9 @@ export async function createAccountWithEmailPasswordAndName (email: string, pass
     } catch (err) {
       errorUpdateProfile(err)
     }
+
+    // Set Creation Date
+    await setCreationDate()
 
     try {
       // Send email verification

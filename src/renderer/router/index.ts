@@ -28,6 +28,16 @@ const routes: RouteRecordRaw[] = [
   { path: '/login', redirect: '/auth/login' },
   { path: '/register', redirect: '/auth/register' },
 
+  // Editor
+  {
+    path: '/editor/:id',
+    name: 'editor',
+    component: () => import(/* webpackChunkName: 'editor' */ '../views/Editor.vue'),
+    meta: {
+      requiresAuth: true
+    }
+  },
+
   // 404 Page Not Found
   {
     path: '/:catchAll(.*)',

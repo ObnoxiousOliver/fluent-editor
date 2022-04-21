@@ -1,7 +1,10 @@
 <template>
   <AppLayout>
     <!-- <AppTabsView :tabindex="editorStore.currentTab" /> -->
-    <router-view />
+
+    <Suspense>
+      <router-view />
+    </Suspense>
   </AppLayout>
 
   <teleport to="head">
@@ -16,7 +19,6 @@
 
 <script lang="ts">
 import { defineComponent, onBeforeUnmount, onMounted } from '@vue/runtime-core'
-import { useRouter } from 'vue-router'
 
 import keybindManager from '../utils/keybindManager'
 import setupActions from '../utils/setupActions'
@@ -32,6 +34,7 @@ import { getAuth, onAuthStateChanged } from '@firebase/auth'
 import { reloadUser, updateUserState } from '../firebase/auth'
 
 import AppLayout from './AppLayout.vue'
+import { subscribeToUserDocumentChanges } from '../firebase/firestore'
 // import HomeView from './HomeView.vue'
 // import Editor from './editor/EditorView.vue'
 
@@ -45,8 +48,6 @@ export default defineComponent({
     const editorStore = useEditor()
     const runtime = useRuntime()
     const actions = useActions()
-
-    const router = useRouter()
 
     // Sync document store with local storage
     // TODO: Remove in production
@@ -103,7 +104,8 @@ export default defineComponent({
       var reloadIntervalId: number | undefined
 
       // Listen for auth state changes
-      var unsubscribe = onAuthStateChanged(auth, (user) => {
+      var unsubscribeUserDocumentChanges: Function
+      var unsubscribeAuth = onAuthStateChanged(auth, (user) => {
         updateUserState(user)
         if (user) {
           if (reloadIntervalId) {
@@ -111,21 +113,24 @@ export default defineComponent({
           }
 
           // Create reload interval
-          reloadIntervalId = setInterval(() => reloadUser(), 30 * 1000)
+          reloadIntervalId = setInterval(() => reloadUser(), 60 * 1000)
+
+          // Subscribe from user document changes
+          unsubscribeUserDocumentChanges = subscribeToUserDocumentChanges()
         } else {
           // Clear Reload Interval
           clearInterval(reloadIntervalId)
           reloadIntervalId = undefined
 
-          // Redirect to login
-          router.push('/auth/login')
+          // Unsubscribe from user document changes
+          unsubscribeUserDocumentChanges()
         }
       })
 
       // Unsubscribe from auth state changes
       onBeforeUnmount(() => {
         clearInterval(reloadIntervalId)
-        unsubscribe()
+        unsubscribeAuth()
       })
     })
 

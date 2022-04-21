@@ -19,8 +19,9 @@
 import { useUserState } from '@/renderer/store'
 import { getAuth } from '@firebase/auth'
 import { defineComponent } from 'vue'
-import { logEmailAlreadyVerified, logSignOut } from '@/renderer/firebase/logging'
+import { logEmailAlreadyVerified } from '@/renderer/firebase/logging'
 import { reloadUser, sendEmailVerification } from '@/renderer/firebase/auth'
+import { useRouter } from 'vue-router'
 
 export default defineComponent({
   setup () {
@@ -28,10 +29,11 @@ export default defineComponent({
 
     const auth = getAuth()
 
-    function signOut () {
-      auth.signOut()
+    async function signOut () {
+      await auth.signOut()
 
-      logSignOut()
+      // Redirect to the login page
+      useRouter().push('/auth/login')
     }
 
     // Send email verification
