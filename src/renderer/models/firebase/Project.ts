@@ -8,6 +8,7 @@ export interface ProjectRef {
 }
 
 export interface Project {
-  name?: String
   uid: string
+  projectVersion: number
+  name?: String
 }
