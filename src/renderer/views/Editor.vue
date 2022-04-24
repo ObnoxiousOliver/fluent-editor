@@ -3,6 +3,8 @@
     id: {{ docId }}
 
     {{ project }}
+
+    <EditorView :tabId="editorStore.tabs[0].id" />
   </div>
 </template>
 
@@ -10,8 +12,11 @@
 import { defineComponent, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { getProject, setProject } from '../firebase/firestore'
+import EditorView from '../layout/editor/EditorView.vue'
+import { useEditor } from '../store'
 
 export default defineComponent({
+  components: { EditorView },
   async setup () {
     const route = useRoute()
     const docId = route.params.id as string
@@ -35,10 +40,23 @@ export default defineComponent({
 
     loaded = true
 
+    const editorStore = useEditor()
+
     return {
       docId,
-      project
+      project,
+      editorStore
     }
   }
 })
 </script>
+
+<style lang="scss" scoped>
+.view-editor {
+  height: 100%;
+}
+
+.editor {
+  height: 100%;
+}
+</style>
