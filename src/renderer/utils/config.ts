@@ -35,7 +35,9 @@ export const config = {
       currentItem = currentItem[key]
     })
 
-    return currentItem?.[_path[_path.length - 1]]
+    const last = _path[_path.length - 1]
+
+    return last ? currentItem?.[last] : currentItem
   },
   set (path: string, value: ConfigValue) {
     const _path = path.split('.')

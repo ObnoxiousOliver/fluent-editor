@@ -1,0 +1,77 @@
+@use './index.scss' as r;
+
+.form {
+  &__text {
+    margin: 40px 0;
+
+    @include r.light {
+      color: r.$col-400;
+    }
+    @include r.dark {
+      color: r.$col-300;
+    }
+  }
+
+  &__link {
+    color: r.$col-primary;
+    text-decoration: none;
+
+    transition: .05s;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  &__forgot-password-link {
+    text-decoration: underline;
+
+    @include r.light {
+      color: r.$col-400;
+    }
+    @include r.dark {
+      color: r.$col-300;
+    }
+  }
+
+  &__inputs {
+    position: relative;
+
+    fieldset {
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+      border: none;
+
+      transition: .2s opacity;
+
+      &:disabled {
+        opacity: 0.5;
+      }
+    }
+  }
+
+  &__spinner {
+    position: absolute;
+    inset: 50% auto auto 50%;
+    transform: translate(-50%, -50%);
+
+    @include r.light {
+      color: r.$col-300;
+    }
+    @include r.dark {
+      color: r.$col-300;
+    }
+  }
+
+  &__input-group {
+    .floating-label-field {
+      width: 100%;
+    }
+
+    &--submit {
+      display: flex;
+      justify-content: flex-end;
+    }
+  }
+}
