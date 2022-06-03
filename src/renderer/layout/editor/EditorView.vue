@@ -1,13 +1,13 @@
 <template>
   <div class="editor">
     <div :class="$bem('editor__panel', 'hierachie')">
-      <HierachiePanel :editor="editor" />
+      <HierachiePanel v-model:editor="editor" />
     </div>
     <div :class="$bem('editor__panel', 'viewer')">
-      <ViewerPanel :editor="editor" />
+      <ViewerPanel v-model:editor="editor" />
     </div>
     <div :class="$bem('editor__panel', 'properties')">
-      <PropertiesPanel :editor="editor" />
+      <PropertiesPanel v-model:editor="editor" />
     </div>
     <div
       v-if="editor?.state?.mode === 'animate'"
@@ -19,8 +19,9 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from 'vue'
-import { useEditor } from '../../store'
+import { createEditorState } from '@/renderer/models/editor/EditorState'
+import { computed, defineComponent, ref, watch } from 'vue'
+import { useEditor, useRuntime } from '../../store'
 
 import HierachiePanel from './HierachiePanel.vue'
 import PropertiesPanel from './PropertiesPanel.vue'
@@ -34,13 +35,37 @@ export default defineComponent({
   },
 
   props: {
-    tabId: String
+    id: { type: String, required: true },
+    project: Object
   },
 
-  setup (props) {
+  setup (props, { emit }) {
     const editorStore = useEditor()
+    const runtime = useRuntime()
 
-    const editor = computed(() => editorStore.tabs.find(x => x.id === props.tabId))
+    const editor = computed(() => editorStore.tabs.find(tab => tab.id === props.id))
+
+    runtime.addTab(props.id)
+
+    const project_ = ref(props.project)
+    watch(project_, () => {
+      emit('update:project', project_.value)
+    })
+
+    watch(editor, () => {
+      if (!project_.value) return
+
+      project_.value.document = JSON.stringify(editor.value?.state.document)
+    }, { deep: true })
+
+    editorStore.tabs.push({
+      id: props.id,
+      documentName: 0,
+      state: createEditorState({
+        document: JSON.parse(props.project?.document)
+      }),
+      history: []
+    })
 
     return {
       editorStore,

@@ -12,7 +12,9 @@ import { useRuntime } from './runtime'
 export const useEditor = defineStore('editor', {
   state: () => ({
     tabs: [] as EditorInstance[],
-    currentTab: 0
+    currentTab: 0,
+
+    editors: {} as { [x: string]: EditorInstance }
   }),
   actions: {
     newTab () {

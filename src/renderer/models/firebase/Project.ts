@@ -1,14 +1,12 @@
-import { Timestamp } from 'firebase/firestore'
 
 export interface ProjectRef {
   id: string
-  name?: String
-  createdAt?: Timestamp
-  lastUpdatedAt?: Timestamp
+  name: string | null
 }
 
 export interface Project {
   uid: string
   projectVersion: number
-  name?: String
+  name: string | null,
+  document: string
 }

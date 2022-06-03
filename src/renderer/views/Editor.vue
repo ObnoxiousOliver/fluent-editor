@@ -1,17 +1,21 @@
 <template>
   <div class="view-editor">
-    id: {{ docId }}
-
-    {{ project }}
+    <EditorView
+      :id="docId"
+      v-model:project="project"
+    />
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, watch } from 'vue'
+import { defineComponent, onBeforeUnmount, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { getProject, setProject } from '../firebase/firestore'
+import EditorView from '../layout/editor/EditorView.vue'
+import { useEditor } from '../store'
 
 export default defineComponent({
+  components: { EditorView },
   async setup () {
     const route = useRoute()
     const docId = route.params.id as string
@@ -19,26 +23,48 @@ export default defineComponent({
     var loaded = false
 
     const project = ref(null as any | null)
+
+    var timeout: number | null = null
     watch(project, () => {
       if (!loaded) return
 
-      // TODO: Add an 5sec interval to make autosave not so expensive
-      setProject(docId, project.value)
+      if (timeout) {
+        clearTimeout(timeout)
+      }
+
+      timeout = setTimeout(() => {
+        // Sync project to firestore
+        setProject(docId, project.value)
+
+        timeout = null
+      }, 5000)
     }, { deep: true })
+
+    onBeforeUnmount(() => {
+      setProject(docId, project.value)
+    })
 
     project.value = await getProject(docId)
 
-    // TODO: Remove this
-    setTimeout(() => {
-      project.value.name = 'new name ' + Math.round(Math.random() * 1000)
-    }, 2000)
-
     loaded = true
+
+    const editorStore = useEditor()
 
     return {
       docId,
-      project
+      project,
+      editorStore
     }
   }
 })
 </script>
+
+<style lang="scss" scoped>
+.view-editor {
+  height: 100%;
+}
+
+.editor {
+  height: 100%;
+}
+</style>

@@ -73,7 +73,7 @@
   </div>
 </template>
 <script lang="ts">
-import { computed, defineComponent, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref, watch } from 'vue'
+import { computed, defineComponent, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 import interact from 'interactjs'
 import { clamp } from '@/renderer/utils/math'
@@ -119,14 +119,14 @@ export default defineComponent({
       set: val => { if (editor_.value) editor_.value.state.canvas.fixToScreen = val }
     })
 
-    onActivated(() => {
+    onMounted(() => {
       actions.hook('canvas-zoom-1', canvasZoom1)
       actions.hook('canvas-zoom-fit-to-screen', canvasZoomFitToScreen)
       actions.hook('canvas-zoom-in', canvasZoomIn)
       actions.hook('canvas-zoom-out', canvasZoomOut)
     })
 
-    onDeactivated(() => {
+    onBeforeUnmount(() => {
       actions.unhook('canvas-zoom-1', canvasZoom1)
       actions.unhook('canvas-zoom-fit-to-screen', canvasZoomFitToScreen)
       actions.unhook('canvas-zoom-in', canvasZoomIn)
@@ -134,6 +134,7 @@ export default defineComponent({
     })
 
     function canvasZoom1 () {
+      console.log('Here')
       scale.value = 1
       fitToScreen.value = false
     }
@@ -574,16 +575,18 @@ export default defineComponent({
       setupTool()
     })
 
+    const currentRuntimeTab = computed(() => runtime.tabs[editor_.value?.id ?? ''])
+
     // Calculate Element Hovering the mouse cursor is hovering
     function pointermove (e: PointerEvent) {
       if (e.pointerType === 'touch') return
-      if (!runtime.currentTab) return
+      if (!currentRuntimeTab.value) return
 
-      runtime.currentTab.hovering = elementsAtPointOnScreen(e.clientX, e.clientY)
+      currentRuntimeTab.value.hovering = elementsAtPointOnScreen(e.clientX, e.clientY)
     }
 
     function elementsAtPointOnScreen (clientX: number, clientY: number): string[] {
-      if (!runtime.currentTab) return []
+      if (!currentRuntimeTab.value) return []
 
       const rootRect = root.value!.getBoundingClientRect()
 
@@ -593,7 +596,7 @@ export default defineComponent({
       const x = (clientX - rootRect.x - docX) / scale.value
       const y = (clientY - rootRect.y - docY) / scale.value
 
-      var elements = Object.values(runtime.currentTab?.registeredElements)
+      var elements = Object.values(currentRuntimeTab.value?.registeredElements)
 
       // console.log(elements)
 

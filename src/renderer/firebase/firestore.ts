@@ -59,9 +59,7 @@ export function subscribeToUserDocumentChanges (): Function {
     userData.loaded = true
     userData.projects = user?.projects?.map((p: any): ProjectRef => ({
       id: p?.id,
-      name: p?.name,
-      createdAt: p?.createdAt,
-      lastUpdatedAt: p?.lastUpdatedAt
+      name: p?.name ?? null
     }))
 
     debug.log(Log.firestore, 'User document changed', snapshot)
@@ -72,9 +70,14 @@ export async function getProject (id: string): Promise<Project> {
   return (await getDoc(doc(collections.projects, id))).data() as Project
 }
 
-export async function setProject (id: string, project: Project) {
-  return await setDoc(doc(collections.projects, id), {
+export async function setProject (id: string | null, project: Project) {
+  const docRef = id
+    ? doc(collections.projects, id)
+    : doc(collections.projects)
+
+  await setDoc(docRef, {
     ...project,
     uid: auth.currentUser?.uid
   })
+  return docRef
 }
