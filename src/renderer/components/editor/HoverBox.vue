@@ -17,13 +17,14 @@ import { computed, defineComponent } from 'vue'
 export default defineComponent({
   props: {
     elementId: String,
-    scale: Number
+    scale: Number,
+    editor: Object
   },
 
   setup (props) {
     const runtime = useRuntime()
 
-    const element = computed(() => runtime.currentTab?.registeredElements[props.elementId!])
+    const element = computed(() => runtime.tabs[props.editor?.id ?? '']?.registeredElements[props.elementId!])
 
     return {
       element

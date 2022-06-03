@@ -28,7 +28,7 @@ import { extendTool } from '../models/editor/tools/Tool'
 import { SelectionTool } from '../tools/selection/selection'
 import { TextBoxTool } from '../tools/textbox/textbox'
 
-import { useActions, useEditor, useRuntime } from '../store'
+import { useActions, useEditor } from '../store'
 
 import { getAuth, onAuthStateChanged } from '@firebase/auth'
 import { reloadUser, updateUserState } from '../firebase/auth'
@@ -46,19 +46,19 @@ export default defineComponent({
 
   setup () {
     const editorStore = useEditor()
-    const runtime = useRuntime()
+    // const runtime = useRuntime()
     const actions = useActions()
 
     // Sync document store with local storage
     // TODO: Remove in production
-    try {
-      editorStore.$patch(JSON.parse(localStorage.getItem('editorState') ?? ''))
-      editorStore.tabs.forEach(x => runtime.addTab(x.id))
-    } catch {}
+    // try {
+    //   editorStore.$patch(JSON.parse(localStorage.getItem('editorState') ?? ''))
+    //   editorStore.tabs.forEach(x => runtime.addTab(x.id))
+    // } catch {}
 
-    editorStore.$subscribe((_, state) => {
-      localStorage.setItem('editorState', JSON.stringify(state))
-    })
+    // editorStore.$subscribe((_, state) => {
+    //   localStorage.setItem('editorState', JSON.stringify(state))
+    // })
 
     // Handle Actions
     setupActions()
