@@ -1,0 +1,7 @@
+{
+  "name": "fluent-editor",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "vue"
+}

@@ -103,7 +103,8 @@ export default defineComponent({
 
   &__form {
     position: absolute;
-    inset: 50% auto auto 10%;
+    top: 50%;
+    left: 10%;
     width: 390px;
     height: 550px;
 
